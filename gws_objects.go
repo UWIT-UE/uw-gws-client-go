@@ -1,87 +1,121 @@
 package uwgwsclient
 
-// A University of Washington UWNetID
-type UWNetID []string
+// UWNetID a University of Washington UWNetID
+type UWNetID string
 
-// An eduPersonPrincipalName or an email address
-type EPPNString []string
+// EPPNString an eduPersonPrincipalName or an email address
+type EPPNString string
 
-// A Domain Name System (DNS) address
-type DNSString []string
+// DNSString a Domain Name System (DNS) address
+type DNSString string
 
-// A Microsoft Infrastructure (MI) machine name (with a $ appended)
-type UWWIString []string
+// UWWIString a Microsoft Infrastructure (MI) machine name (with a $ appended)
+type UWWIString string
 
-// An affiliate
+// Affiliate an affiliate
 // enum [ email, google, uwnetid, radius ]
-type Affiliate []string
+type Affiliate string
 
-// Exchange Email senders - a comma separated list of ids
+// EmailSendersString Exchange Email senders - a comma separated list of ids
 // example: joeuser,u_joeuser_friends
-type EmailSendersString []string
+type EmailSendersString string
 
-// Google Groups senders - choice keyword
+// GoogleSenderString Google Groups senders - choice keyword
 // enum [ none, all, members, uw ]
-type GoogleSenderString []string
+type GoogleSenderString string
 
+// GroupResponse what you get back when asking for a Group
+type GroupResponse struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string
+
+	// Meta Group metadata
+	Meta struct {
+		// resourceType enum [ group ]
+		ResourceType string
+
+		// Version API version
+		Version string
+
+		// RegID the regid of the Group
+		RegID string
+
+		// ID the ID of the group
+		ID string
+
+		// SelfRef URL of this resource
+		SelfRef string
+
+		// MemberRef URL for this groups members
+		MemberRef string
+
+		// Timestamp Response timestamp (milli-seconds from epoch)
+		Timestamp int
+	}
+
+	// Data a Group struct
+	Data Group
+}
+
+// Group Groups Service group metadata
 type Group struct {
 	// Unique, opaque idenfier for the group
-	Regid string `json:"regid"`
+	Regid string
 
 	// id of the group - includes path
-	Name string `json:"name"`
+	Name string
 
 	// Descriptive name of the group
-	DisplayName string `json:"displayName"`
+	DisplayName string
 
 	// Group's description
-	Description string `json:"description"`
+	Description string
 
 	// Create timestamp (milli-seconds from epoch)
-	Created int `json:"created"`
+	Created int
 
 	// Modify timestamp (milli-seconds from epoch)
-	LastModified int `json:"lastModified"`
+	LastModified int
 
 	// lastMember timestamp (milli-seconds from epoch)
-	LastMemberModified int `json:"lastMemberModified"`
+	LastMemberModified int
 
 	// Contact person (uwnetid) for the group
-	Contact UWNetID `json:"contact"`
+	Contact UWNetID
 
 	// Multi-factor authn required
-	AuthnFactor int `json:"authnfactor"`
+	AuthnFactor int `json:",string"`
 
 	// Classification of membership. Enum [ u, r, c, '' ]
 	// u=unclassified, r=restricted, c=confidential, missing=no classification
-	Classification string `json:"classification"`
+	Classification string
 
 	// Membership dependency group name.  Example: uw_employee
-	DependsOn string `json:"dependsOn"`
+	DependsOn string
 
 	// Numeric GID
-	Gid int `json:"gid"`
+	Gid int `json:",string"`
 
 	// Entities with full group access
-	Admins []Entity `json:"admins"`
+	Admins []Entity
 
 	// Entities who can edit membership
-	Updaters []Entity `json:"updaters"`
+	Updaters []Entity
 
 	// Entities who can create sub-groups
-	Creators []Entity `json:"creators"`
+	Creators []Entity
 
 	// Entities who can read group membership
-	Readers []Entity `json:"readers"`
+	Readers []Entity
 
 	// Entities who can opt in to membership
-	Optins []Entity `json:"optins"`
+	Optins []Entity
 
 	// Entities who can opt out of membership
-	Optouts []Entity `json:"optouts"`
+	Optouts []Entity
 }
 
-// An Entity
+// Entity an Entity
 type Entity struct {
 	// Type of entity. Enum [ uwnetid, group, dns, eppn, set ]
 	EntityType string
