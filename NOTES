@@ -2,6 +2,8 @@ api client example
     https://github.com/hashicorp/vault/blob/4ca3b84f522046ad6c15b3cdcfc904089a66d5dd/api/client.go
 
 
+change package to "gws" and put in path github.com/uwit-ue/uw-gws-client-go/gws
+
 
     def __init__(self, config={}):
     def search_groups(self, **kwargs):

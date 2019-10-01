@@ -1,4 +1,4 @@
-package uwgwsclient
+package gws
 
 // UWNetID a University of Washington UWNetID
 type UWNetID string
