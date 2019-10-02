@@ -26,6 +26,36 @@ func main() {
 
 	fmt.Println("Starting the application...")
 
+	// Vault API calling
+	clientConfig := &gws.Config{}
+	tlsConfig := &gws.TLSConfig{
+		CACert:     *caFile,
+		ClientCert: *certFile,
+		ClientKey:  *keyFile,
+	}
+	if err := clientConfig.ConfigureTLS(tlsConfig); err != nil {
+		log.Fatal(err)
+	}
+
+	gwsClient, err := gws.NewClient(clientConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp1, err := gwsClient.Config.HTTPClient.GET("https://iam-ws.u.washington.edu/group_sws/v3/group/u_devtools_admin")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Dump response
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(string(data))
+
+	fmt.Println("Part Two...")
+
 	// Load client cert
 	cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
 	if err != nil {
@@ -41,13 +71,13 @@ func main() {
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	// Setup HTTPS client
-	tlsConfig := &tls.Config{
+	tlsConfig2 := &tls.Config{
 		Certificates:  []tls.Certificate{cert},
 		RootCAs:       caCertPool,
 		Renegotiation: tls.RenegotiateOnceAsClient,
 	}
-	tlsConfig.BuildNameToCertificate()
-	transport := &http.Transport{TLSClientConfig: tlsConfig}
+	tlsConfig2.BuildNameToCertificate()
+	transport := &http.Transport{TLSClientConfig: tlsConfig2}
 	client := &http.Client{Transport: transport}
 
 	// Do GET something
