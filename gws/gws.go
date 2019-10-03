@@ -2,304 +2,106 @@ package gws
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"os"
-	"path"
-	"strconv"
-	"strings"
+	"log"
 	"time"
 
-	retryablehttp "github.com/hashicorp/go-retryablehttp"
-	"golang.org/x/net/http2"
+	"github.com/go-resty/resty"
 )
 
-// Config is used to configure the creation of the client.
+// Config holds all the Client configuration
 type Config struct {
-	// Address is the address of the GWS server. This should be a complete
-	// URL such as "https://groups.uw.edu".
-	Address string
-
-	// HTTPClient is the HTTP client to use.
-	HTTPClient *http.Client
-
-	// Timeout is for setting custom timeout parameter in the HTTPClient
-	Timeout time.Duration
-
-	// If there is an error when creating the configuration, this will be the
-	// error
-	Error error
-
-	// The Backoff function to use; a default is used if not provided
-	Backoff retryablehttp.Backoff
+	APIUrl        string
+	Timeout       time.Duration
+	SkipTLSVerify bool
+	CAFile        string
+	ClientCert    string
+	ClientKey     string
 }
 
-// TLSConfig contains the parameters needed to configure TLS on the HTTP client
-type TLSConfig struct {
-	// CACert is the path to a PEM-encoded CA cert file to use to verify the
-	// server SSL certificate.
-	CACert string
-
-	// CAPath is the path to a directory of PEM-encoded CA cert files to verify
-	// the server SSL certificate.
-	CAPath string
-
-	// ClientCert is the path to the certificate for API authentication
-	ClientCert string
-
-	// ClientKey is the path to the private key for API authentication
-	ClientKey string
-
-	// TLSServerName, if set, is used to set the SNI host when connecting via
-	// TLS.
-	TLSServerName string
-
-	// Insecure enables or disables SSL verification
-	Insecure bool
-}
-
-// DefaultConfig returns a default configuration for the client. It is
-// safe to modify the return value of this function.
-//
-// The default Address is https://groups.uw.edu/group_sws/v3, but this can be overridden by
-// setting the `GWS_ADDR` environment variable.
-//
-// If an error is encountered, this will return nil.
-func DefaultConfig() *Config {
-	config := &Config{
-		Address:    "https://groups.uw.edu/group_sws/v3",
-		HTTPClient: &http.Client{},
-	}
-	config.HTTPClient.Timeout = time.Second * 60
-
-	transport := config.HTTPClient.Transport.(*http.Transport)
-	transport.TLSHandshakeTimeout = 10 * time.Second
-	transport.TLSClientConfig = &tls.Config{
-		MinVersion: tls.VersionTLS12,
-	}
-	if err := http2.ConfigureTransport(transport); err != nil {
-		config.Error = err
-		return config
-	}
-
-	if err := config.ReadEnvironment(); err != nil {
-		config.Error = err
-		return config
-	}
-
-	return config
-}
-
-// ConfigureTLS takes a set of TLS configurations and applies those to the the
-// HTTP client.
-func (c *Config) ConfigureTLS(t *TLSConfig) error {
-	if c.HTTPClient == nil {
-		c.HTTPClient = DefaultConfig().HTTPClient
-	}
-	clientTLSConfig := c.HTTPClient.Transport.(*http.Transport).TLSClientConfig
-
-	var clientCert tls.Certificate
-	foundClientCert := false
-
-	switch {
-	case t.ClientCert != "" && t.ClientKey != "":
-		var err error
-		clientCert, err = tls.LoadX509KeyPair(t.ClientCert, t.ClientKey)
-		if err != nil {
-			return err
-		}
-		foundClientCert = true
-	case t.ClientCert != "" || t.ClientKey != "":
-		return fmt.Errorf("both client cert and client key must be provided")
-	}
-
-	if t.CACert != "" {
-		caCert, err := ioutil.ReadFile(t.CACert)
-		if err != nil {
-			return err
-		}
-		caCertPool := x509.NewCertPool()
-		ok := caCertPool.AppendCertsFromPEM(caCert)
-		if !ok {
-			return fmt.Errorf("Error loading CA File: Couldn't parse PEM in: %s", caCert)
-		}
-		clientTLSConfig.RootCAs = caCertPool
-	}
-
-	if t.Insecure {
-		clientTLSConfig.InsecureSkipVerify = true
-	}
-
-	if foundClientCert {
-		// We use this function to ignore the server's preferential list of
-		// CAs, otherwise any CA used for the cert auth backend must be in the
-		// server's CA pool
-		clientTLSConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-			return &clientCert, nil
-		}
-	}
-
-	if t.TLSServerName != "" {
-		clientTLSConfig.ServerName = t.TLSServerName
-	}
-
-	return nil
-}
-
-// ReadEnvironment reads configuration information from the environment. If
-// there is an error, no configuration value is updated.
-func (c *Config) ReadEnvironment() error {
-	var envAddress string
-	var envCACert string
-	var envCAPath string
-	var envClientCert string
-	var envClientKey string
-	var envClientTimeout time.Duration
-	var envInsecure bool
-	var envTLSServerName string
-
-	// Parse the environment variables
-	if v := os.Getenv("GWS_ADDRESS"); v != "" {
-		envAddress = v
-	}
-	if v := os.Getenv("GWS_CACERT"); v != "" {
-		envCACert = v
-	}
-	if v := os.Getenv("GWS_CAPATH"); v != "" {
-		envCAPath = v
-	}
-	if v := os.Getenv("GWS_CLIENT_CERT"); v != "" {
-		envClientCert = v
-	}
-	if v := os.Getenv("GWS_CLIENT_KEY"); v != "" {
-		envClientKey = v
-	}
-	if t := os.Getenv("GWS_CLIENT_TIMEOUT"); t != "" {
-		clientTimeout, err := strconv.ParseInt(t, 10, 64)
-		if err != nil {
-			return fmt.Errorf("could not parse %q", "GWS_CLIENT_TIMEOUT")
-		}
-		envClientTimeout = time.Duration(clientTimeout) * time.Second
-	}
-	if v := os.Getenv("GWS_SKIP_VERIFY"); v != "" {
-		var err error
-		envInsecure, err = strconv.ParseBool(v)
-		if err != nil {
-			return fmt.Errorf("could not parse VAULT_SKIP_VERIFY")
-		}
-	}
-	if v := os.Getenv("GWS_TLS_SERVER_NAME"); v != "" {
-		envTLSServerName = v
-	}
-
-	// Configure the HTTP clients TLS configuration.
-	t := &TLSConfig{
-		CACert:        envCACert,
-		CAPath:        envCAPath,
-		ClientCert:    envClientCert,
-		ClientKey:     envClientKey,
-		TLSServerName: envTLSServerName,
-		Insecure:      envInsecure,
-	}
-
-	if err := c.ConfigureTLS(t); err != nil {
-		return err
-	}
-
-	if envAddress != "" {
-		c.Address = envAddress
-	}
-
-	if envClientTimeout != 0 {
-		c.Timeout = envClientTimeout
-	}
-
-	return nil
-}
-
-// Client is the client to the Vault API. Create a client with NewClient.
+// Client wraps resty.Client
 type Client struct {
-	addr    *url.URL
-	Config  *Config
-	headers http.Header
+	resty      *resty.Client
+	config     *Config
+	configured bool
 }
 
-// NewClient returns a new client for the given configuration.
-//
-// If the configuration is nil, Vault will use configuration from
-// DefaultConfig(), which is the recommended starting configuration.
-//
-// If the environment variable `VAULT_TOKEN` is present, the token will be
-// automatically added to the client. Otherwise, you must manually call
-// `SetToken()`.
-func NewClient(c *Config) (*Client, error) {
-	def := DefaultConfig()
-	if def == nil {
-		return nil, fmt.Errorf("could not create/read default configuration")
+// DefaultConfig constructs a basic Config object
+func DefaultConfig() *Config {
+	dc := &Config{
+		//APIUrl: "https://groups.uw.edu/group_sws/v3",
+		APIUrl:        "https://iam-ws.u.washington.edu/group_sws/v3",
+		Timeout:       30,
+		SkipTLSVerify: false,
 	}
-	if def.Error != nil {
-		// return nil, errwrap.Wrapf("error encountered setting up default configuration: {{err}}", def.Error)
-		return nil, fmt.Errorf("error encountered setting up default configuration")
+	return dc
+}
+
+// NewClient builds a new client with defaults
+func NewClient(config *Config) (*Client, error) {
+	restyInst := resty.New()
+	nc := &Client{resty: restyInst, config: config}
+
+	// setTLSClientConfig must be before other TLS in configure()
+	nc.resty.SetTLSClientConfig(&tls.Config{Renegotiation: tls.RenegotiateOnceAsClient})
+	nc.configure()
+
+	// Standardize redirect policy
+	//restyInst.SetRedirectPolicy(resty.FlexibleRedirectPolicy(10))
+
+	// JSON
+	restyInst.SetHeader("Accept", "application/json")
+	restyInst.SetHeader("Content-Type", "application/json")
+
+	return nc, nil
+}
+
+func (client *Client) configure() {
+	if client.configured {
+		return
 	}
 
-	if c == nil {
-		c = def
-	}
+	restyInst := client.resty
+	config := client.config
 
-	u, err := url.Parse(c.Address)
+	restyInst.SetHostURL(config.APIUrl)
+	restyInst.SetTimeout(config.Timeout * time.Second)
+
+	// setup TLS here
+	restyInst.SetRootCertificate(config.CAFile)
+	cert, err := tls.LoadX509KeyPair(config.ClientCert, config.ClientKey)
 	if err != nil {
-		return nil, err
+		log.Fatalf("ERROR client certificate: %s", err)
+		return
 	}
-
-	if c.HTTPClient == nil {
-		c.HTTPClient = def.HTTPClient
-	}
-	if c.HTTPClient.Transport == nil {
-		c.HTTPClient.Transport = def.HTTPClient.Transport
-	}
-
-	client := &Client{
-		addr:   u,
-		config: c,
-	}
-
-	return client, nil
+	restyInst.SetCertificates(cert)
+	restyInst.SetDebug(true)
+	fmt.Printf("%#v\n", config)
+	client.configured = true
 }
 
-// NewRequest creates a new raw request object to query the Vault server
-// configured for this client. This is an advanced method and generally
-// doesn't need to be called externally.
-func (c *Client) NewRequest(method, requestPath string) *Request {
-	addr := c.addr
-	headers := c.headers
+// SetTLSClientConfig assigns client TLS config
+func (client *Client) SetTLSClientConfig(c *tls.Config) {
+	client.resty.SetTLSClientConfig(c)
+}
 
-	req := &Request{
-		Method: method,
-		URL: &url.URL{
-			User:   addr.User,
-			Scheme: addr.Scheme,
-			Host:   host,
-			Path:   path.Join(addr.Path, requestPath),
-		},
-		Params: make(map[string][]string),
+// R returns new resty.Request from configured client
+func (client *Client) request() *resty.Request {
+	client.configure()
+	request := client.resty.R()
+
+	return request
+}
+
+func (c *Client) GetGroup(groupid string) (Group, error) {
+	var group Group
+
+	resp, err := c.request().SetResult(GroupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
+	if err != nil {
+		log.Fatal(err)
+		return group, nil
 	}
+	group = resp.Result().(*GroupResponse).Data
 
-	var lookupPath string
-	switch {
-	case strings.HasPrefix(requestPath, "/v3/"):
-		lookupPath = strings.TrimPrefix(requestPath, "/v3/")
-	case strings.HasPrefix(requestPath, "v3/"):
-		lookupPath = strings.TrimPrefix(requestPath, "v3/")
-	default:
-		lookupPath = requestPath
-	}
-
-	if headers != nil {
-		req.Headers = headers
-	}
-
-	return req
+	return group, nil
 }
