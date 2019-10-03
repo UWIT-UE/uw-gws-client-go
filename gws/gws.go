@@ -75,8 +75,8 @@ func (client *Client) configure() {
 		return
 	}
 	restyInst.SetCertificates(cert)
-	restyInst.SetDebug(true)
-	fmt.Printf("%#v\n", config)
+	restyInst.SetDebug(false)
+	//fmt.Printf("%#v\n", config)
 	client.configured = true
 }
 
