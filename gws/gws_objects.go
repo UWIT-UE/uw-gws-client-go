@@ -57,6 +57,12 @@ type GroupResponse struct {
 	Data Group
 }
 
+// PutGroup Group packaged for PUT body
+// This has no use externally
+type putGroup struct {
+	Data Group
+}
+
 // Group Groups Service group metadata
 type Group struct {
 	// Unique, opaque idenfier for the group
