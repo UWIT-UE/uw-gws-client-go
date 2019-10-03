@@ -27,3 +27,8 @@ change package to "gws" and put in path github.com/uwit-ue/uw-gws-client-go/gws
     def _delete_resource(self, url):
     def _headers(self):
     def _log_error(self, url, response):
+
+
+
+resty ideas
+https://github.com/sw092180/sensu-influxdb-handler/blob/819fc5637b7a9ff14a00c52c59dc6e9aef8c4556/src/github.com/sensu/sensu-go/cli/client/client.go
