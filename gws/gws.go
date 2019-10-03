@@ -100,9 +100,25 @@ func (client *Client) GetGroup(groupid string) (Group, error) {
 	resp, err := client.request().SetResult(GroupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
 		log.Fatal(err)
-		return group, nil
+		return group, err
 	}
 	group = resp.Result().(*GroupResponse).Data
 
+	return group, nil
+}
+
+// GetGroup get the group referenced by the groupid
+func (client *Client) CreateGroup(newgroup Group) (Group, error) {
+	var group Group
+
+	body := &putGroup{Data: newgroup}
+	groupid := newgroup.Name
+
+	resp, err := client.request().SetResult(GroupResponse{}).SetBody(body).Put(fmt.Sprintf("/group/%s", groupid))
+	if err != nil {
+		log.Fatal(err)
+		return group, err
+	}
+	group = resp.Result().(*GroupResponse).Data
 	return group, nil
 }
