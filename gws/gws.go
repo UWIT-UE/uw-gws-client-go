@@ -93,10 +93,11 @@ func (client *Client) request() *resty.Request {
 	return request
 }
 
-func (c *Client) GetGroup(groupid string) (Group, error) {
+// GetGroup get the group referenced by the groupid
+func (client *Client) GetGroup(groupid string) (Group, error) {
 	var group Group
 
-	resp, err := c.request().SetResult(GroupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
+	resp, err := client.request().SetResult(GroupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
 		log.Fatal(err)
 		return group, nil
