@@ -57,6 +57,7 @@ type GroupResponse struct {
 	Data Group
 }
 
+// TODO is putGroup readable by json package?
 // PutGroup Group packaged for PUT body
 // This has no use externally
 type putGroup struct {
@@ -138,6 +139,38 @@ type Entity struct {
 	Name string `json:"name,omitempty"`
 }
 
+// Error describes API errors
+// Not useful externally
+type Error struct {
+	Status int      `json:"status"`
+	Detail []string `json:"detail"`
+	// something returned another field
+}
+
+// ErrorResponse is returned by API calls that fail
+// Not useful externally
+type ErrorResponse struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string
+
+	// Meta Group metadata
+	Meta struct {
+		// Resource constant value "string"
+		Resource string
+
+		// Version API version
+		Version string
+
+		// ID constant value "string"
+		ID string
+
+		// Timestamp Response timestamp (milli-seconds from epoch)
+		Timestamp int
+	}
+
+	// Errors describe errors that occurred
+	Errors []Error
+}
 
 // Error
 // 	  {
