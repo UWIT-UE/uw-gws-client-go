@@ -24,8 +24,8 @@ type EmailSendersString string
 // enum [ none, all, members, uw ]
 type GoogleSenderString string
 
-// GroupResponse what you get back when asking for a Group
-type GroupResponse struct {
+// groupResponse what you get back when asking for a Group
+type groupResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
 
@@ -141,15 +141,15 @@ type Entity struct {
 
 // Error describes API errors
 // Not useful externally
-type Error struct {
+type apiError struct {
 	Status int      `json:"status"`
 	Detail []string `json:"detail"`
-	// something returned another field
+	// udocumented field "notFound" []
 }
 
 // ErrorResponse is returned by API calls that fail
 // Not useful externally
-type ErrorResponse struct {
+type errorResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
 
@@ -169,7 +169,7 @@ type ErrorResponse struct {
 	}
 
 	// Errors describe errors that occurred
-	Errors []Error
+	Errors []apiError
 }
 
 // Error
