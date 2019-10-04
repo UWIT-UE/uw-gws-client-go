@@ -33,8 +33,8 @@ func main() {
 	fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
 
 	newg := &gws.Group{
-		ID:          "u_unixgrp_testgroup",
-		DisplayName: "A test group u_unixgrp_testgroup",
+		ID:          "u_unixgrp_testgroup3",
+		DisplayName: "A test group u_unixgrp_testgroup3",
 		Description: "lalala",
 		Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
 	}

@@ -98,12 +98,12 @@ func (client *Client) request() *resty.Request {
 func (client *Client) GetGroup(groupid string) (Group, error) {
 	var group Group
 
-	resp, err := client.request().SetResult(GroupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
+	resp, err := client.request().SetResult(groupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
 		log.Fatal(err)
 		return group, err
 	}
-	group = resp.Result().(*GroupResponse).Data
+	group = resp.Result().(*groupResponse).Data
 
 	return group, nil
 }
@@ -115,9 +115,9 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 	body := &putGroup{Data: newgroup}
 	groupid := newgroup.ID
 
-	resp, err := client.request().SetResult(GroupResponse{}).SetBody(body).Put(fmt.Sprintf("/group/%s", groupid))
+	resp, err := client.request().SetResult(groupResponse{}).SetBody(body).Put(fmt.Sprintf("/group/%s", groupid))
 	if resp.IsError() {
-		var er ErrorResponse
+		var er errorResponse
 		err := json.Unmarshal(resp.Body(), &er)
 		if err != nil {
 			fmt.Println("error:", err)
@@ -126,6 +126,14 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 		//log.Fatal(resp.StatusCode)
 		//return group, err
 	}
+	// groupr := resp.Result().(*GroupResponse)
+	// fmt.Printf("%#v\n", groupr)
+	// if resp.IsError() {
+	// 	//var er ErrorResponse
+	// 	return group, decodeErrorResponse(resp.Result().(*GroupResponse).Errors)
+	// 	//log.Fatal(resp.StatusCode)
+	// 	//return group, err
+	// }
 	if err != nil {
 		log.Fatal(err)
 		return group, err
@@ -141,7 +149,8 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 	fmt.Printf("%#v\n", resp)
 	fmt.Printf("%#v\n", resp.Status())
 	fmt.Printf("%#v\n", err)
-	group = resp.Result().(*GroupResponse).Data
+	group = resp.Result().(*groupResponse).Data
+
 	return group, nil
 }
 
@@ -151,12 +160,20 @@ func ToEntityList(item *Entity) []Entity {
 	return ea
 }
 
-func decodeErrorResponse(er ErrorResponse) error {
+func decodeErrorResponse(er errorResponse) error {
 	e := er.Errors[0] // assume there is only ever one error in the array
-	err := fmt.Errorf("gws error status %d: %q", e.Status, strings.Join(e.Detail, ", "))
+	fmt.Println("detail", e.Detail)
+	err := fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
 
 	return err
 }
+
+// func decodeErrorResponse(er []Error) error {
+// 	e := er[0] // assume there is only ever one error in the array
+// 	err := fmt.Errorf("gws error status %d: %q", e.Status, strings.Join(e.Detail, ", "))
+
+// 	return err
+// }
 
 // func ToEntity(items []*Entity) []Entity {
 // 	var ea []Entity
