@@ -29,7 +29,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	grp1, _ := gwsClient.GetGroup("u_devtools_admin")
+	grp1, err := gwsClient.GetGroup("u_devtools_admin")
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
 
 	newg := &gws.Group{

@@ -103,6 +103,16 @@ func (client *Client) GetGroup(groupid string) (Group, error) {
 		log.Fatal(err)
 		return group, err
 	}
+	if resp.IsError() {
+		var er errorResponse
+		err := json.Unmarshal(resp.Body(), &er)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		return group, decodeErrorResponse(er)
+		//log.Fatal(resp.StatusCode)
+		//return group, err
+	}
 	group = resp.Result().(*groupResponse).Data
 
 	return group, nil
