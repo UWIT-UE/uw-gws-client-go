@@ -29,8 +29,7 @@ type Client struct {
 // DefaultConfig constructs a basic Config object
 func DefaultConfig() *Config {
 	dc := &Config{
-		//APIUrl: "https://groups.uw.edu/group_sws/v3",
-		APIUrl:        "https://iam-ws.u.washington.edu/group_sws/v3",
+		APIUrl:        "https://groups.uw.edu/group_sws/v3", // requires CAFile to be incommon
 		Timeout:       30,
 		SkipTLSVerify: false,
 	}
@@ -75,7 +74,7 @@ func (client *Client) configure() {
 		return
 	}
 	restyInst.SetCertificates(cert)
-	restyInst.SetDebug(false)
+	restyInst.SetDebug(true)
 	//fmt.Printf("%#v\n", config)
 	client.configured = true
 }
@@ -107,18 +106,47 @@ func (client *Client) GetGroup(groupid string) (Group, error) {
 	return group, nil
 }
 
-// GetGroup get the group referenced by the groupid
+// CreateGroup get the group referenced by the groupid
 func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 	var group Group
 
 	body := &putGroup{Data: newgroup}
-	groupid := newgroup.Name
+	groupid := newgroup.ID
 
 	resp, err := client.request().SetResult(GroupResponse{}).SetBody(body).Put(fmt.Sprintf("/group/%s", groupid))
+	if resp.IsError() {
+		log.Fatal(resp.StatusCode)
+		return group, err
+	}
 	if err != nil {
 		log.Fatal(err)
 		return group, err
 	}
+
+	// don't unmarshall inside of resty
+	// if error unmarshall with ErrorResponse
+	// if success unmarshall with GroupResponse
+
+	// resty doesn't report errors
+	// decode errors function when statuscode is not 200
+
+	fmt.Printf("%#v\n", resp)
+	fmt.Printf("%#v\n", resp.Status())
+	fmt.Printf("%#v\n", err)
 	group = resp.Result().(*GroupResponse).Data
 	return group, nil
 }
+
+func ToEntityList(item *Entity) []Entity {
+	var ea []Entity
+	ea = append(ea, *item)
+	return ea
+}
+
+// func ToEntity(items []*Entity) []Entity {
+// 	var ea []Entity
+// 	for _, item := range items {
+// 		ea = append(ea, *item)
+// 	}
+// 	return ea
+// }

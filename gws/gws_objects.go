@@ -60,71 +60,71 @@ type GroupResponse struct {
 // PutGroup Group packaged for PUT body
 // This has no use externally
 type putGroup struct {
-	Data Group
+	Data Group `json:"data"`
 }
 
 // Group Groups Service group metadata
 type Group struct {
 	// Unique, opaque idenfier for the group
-	Regid string
+	Regid string `json:"regid,omitempty"`
 
 	// id of the group - includes path
-	Name string
+	ID string `json:"id,omitempty"`
 
 	// Descriptive name of the group
-	DisplayName string
+	DisplayName string `json:"displayName,omitempty"`
 
 	// Group's description
-	Description string
+	Description string `json:"description,omitempty"`
 
 	// Create timestamp (milli-seconds from epoch)
-	Created int
+	Created int `json:"created,omitempty"`
 
 	// Modify timestamp (milli-seconds from epoch)
-	LastModified int
+	LastModified int `json:"lastModified,omitempty"`
 
 	// lastMember timestamp (milli-seconds from epoch)
-	LastMemberModified int
+	LastMemberModified int `json:"lastMemberModified,omitempty"`
 
 	// Contact person (uwnetid) for the group
-	Contact UWNetID
+	Contact UWNetID `json:"contact,omitempty"`
 
 	// Multi-factor authn required
-	AuthnFactor int `json:",string"`
+	AuthnFactor int `json:"authnfactor,string,omitempty"`
 
 	// Classification of membership. Enum [ u, r, c, '' ]
 	// u=unclassified, r=restricted, c=confidential, missing=no classification
-	Classification string
+	Classification string `json:"classification,omitempty"`
 
 	// Membership dependency group name.  Example: uw_employee
-	DependsOn string
+	DependsOn string `json:"dependsOn,omitempty"`
 
 	// Numeric GID
-	Gid int `json:",string"`
+	Gid int `json:"gid,string,omitempty"`
 
 	// Entities with full group access
-	Admins []Entity
+	Admins []Entity `json:"admins,omitempty"`
 
 	// Entities who can edit membership
-	Updaters []Entity
+	Updaters []Entity `json:"updaters,omitempty"`
 
 	// Entities who can create sub-groups
-	Creators []Entity
+	Creators []Entity `json:"creators,omitempty"`
 
 	// Entities who can read group membership
-	Readers []Entity
+	Readers []Entity `json:"readers,omitempty"`
 
 	// Entities who can opt in to membership
-	Optins []Entity
+	Optins []Entity `json:"optins,omitempty"`
 
 	// Entities who can opt out of membership
-	Optouts []Entity
+	Optouts []Entity `json:"optouts,omitempty"`
 }
 
-// Entity an Entity
+// Entity is a named uwnetid, group, dns eppn or set
 type Entity struct {
 	// Type of entity. Enum [ uwnetid, group, dns, eppn, set ]
-	EntityType string
+	Type string `json:"type,omitempty"`
 
 	// ID of entity
 	// If the type is 'set' the id is:
@@ -132,8 +132,40 @@ type Entity struct {
 	//   none: no entity
 	//   uw: any UW member entity
 	//   member: any member of the group
-	EntityID string
+	ID string `json:"id,omitempty"`
 
 	// Display name of entity.
-	EntityName string
+	Name string `json:"name,omitempty"`
 }
+
+
+// Error
+// 	  {
+// 		"status": 401,
+// 		"detail": [
+// 		  "No permission to read membership"
+// 		]
+// 	  }
+
+// ErrorResponse
+// {
+// 	"schemas": [
+// 	  "urn:mace:washington.edu:schemas:groups:1.0"
+// 	],
+// 	"meta": [
+// 	  {
+// 		"resource": "string",
+// 		"version": "v3.0",
+// 		"id": "string",
+// 		"timestamp": 1214343146201
+// 	  }
+// 	],
+// 	"errors": [
+// 	  {
+// 		"status": 401,
+// 		"detail": [
+// 		  "No permission to read membership"
+// 		]
+// 	  }
+// 	]
+//   }

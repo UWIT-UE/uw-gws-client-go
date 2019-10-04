@@ -19,6 +19,7 @@ func main() {
 	fmt.Println("Starting the application...")
 
 	clientConfig := gws.DefaultConfig()
+	clientConfig.APIUrl = "https://eval.groups.uw.edu/group_sws/v3"
 	clientConfig.CAFile = *caFile
 	clientConfig.ClientCert = *certFile
 	clientConfig.ClientKey = *keyFile
@@ -30,6 +31,19 @@ func main() {
 
 	grp1, _ := gwsClient.GetGroup("u_devtools_admin")
 	fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
+
+	newg := &gws.Group{
+		ID:          "u_unixgrp_testgroup",
+		DisplayName: "A test group u_unixgrp_testgroup",
+		Description: "lalala",
+		Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
+	}
+
+	grp2, err := gwsClient.CreateGroup(*newg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("egid", grp2.Regid, "name", grp2.DisplayName)
 
 	fmt.Println("Terminating the application...")
 }
