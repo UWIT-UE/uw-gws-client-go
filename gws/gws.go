@@ -2,8 +2,10 @@ package gws
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty"
@@ -115,8 +117,14 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 
 	resp, err := client.request().SetResult(GroupResponse{}).SetBody(body).Put(fmt.Sprintf("/group/%s", groupid))
 	if resp.IsError() {
-		log.Fatal(resp.StatusCode)
-		return group, err
+		var er ErrorResponse
+		err := json.Unmarshal(resp.Body(), &er)
+		if err != nil {
+			fmt.Println("error:", err)
+		}
+		return group, decodeErrorResponse(er)
+		//log.Fatal(resp.StatusCode)
+		//return group, err
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -141,6 +149,13 @@ func ToEntityList(item *Entity) []Entity {
 	var ea []Entity
 	ea = append(ea, *item)
 	return ea
+}
+
+func decodeErrorResponse(er ErrorResponse) error {
+	e := er.Errors[0] // assume there is only ever one error in the array
+	err := fmt.Errorf("gws error status %d: %q", e.Status, strings.Join(e.Detail, ", "))
+
+	return err
 }
 
 // func ToEntity(items []*Entity) []Entity {
