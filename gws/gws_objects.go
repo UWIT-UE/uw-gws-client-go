@@ -139,6 +139,78 @@ type Entity struct {
 	Name string `json:"name,omitempty"`
 }
 
+// Member describes a member of a group
+type Member struct {
+	// Type of member enum [ uwnetid, group, dns, eppn, uwwi ]
+	Type string `json:"type"`
+
+	// ID of member
+	ID string `json:"id"`
+}
+
+// EffMember describes an effective member of a group
+type EffMember struct {
+	// Type of member enum [ uwnetid, group, dns, eppn, uwwi ]
+	Type string `json:"type"`
+
+	// ID of member
+	ID string `json:"id"`
+
+	// Type of member enum [ direct, indirect ]
+	MType string
+
+	// Source group(s) if not direct member
+	Source string
+}
+
+// MembershipMeta is metadata returned by membership API requests
+type MembershipMeta struct {
+	// resourceType enum [ groupmembers ]
+	ResourceType string
+
+	// Version API version
+	Version string
+
+	// RegID the regid of the Group
+	RegID string
+
+	// ID the ID of the group
+	ID string
+
+	// MembershipType enum [ direct, effective ]
+	MembershipType string
+
+	// SelfRef URL of this resource
+	SelfRef string
+
+	// Timestamp Response timestamp (milli-seconds from epoch)
+	Timestamp int
+}
+
+// membershipResponse is what you get back when asking for group membership
+type membershipResponse struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string
+
+	// Meta Group metadata
+	Meta MembershipMeta
+
+	// Data
+	Members []Member `json:"data"`
+}
+
+// effMmembershipResponse is what you get back when asking for effective group membership
+type effMembershipResponse struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string
+
+	// Meta Group metadata
+	Meta MembershipMeta
+
+	// Data
+	Members []EffMember `json:"data"`
+}
+
 // Error describes API errors
 // Not useful externally
 type apiError struct {

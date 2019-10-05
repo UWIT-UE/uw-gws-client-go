@@ -44,7 +44,7 @@ func NewClient(config *Config) (*Client, error) {
 	nc := &Client{resty: restyInst, config: config}
 
 	// setTLSClientConfig must be before other TLS in configure()
-	nc.resty.SetTLSClientConfig(&tls.Config{Renegotiation: tls.RenegotiateOnceAsClient})
+	nc.resty.SetTLSClientConfig(&tls.Config{Renegotiation: tls.RenegotiateFreelyAsClient})
 	nc.configure()
 
 	// Standardize redirect policy
@@ -94,74 +94,90 @@ func (client *Client) request() *resty.Request {
 	return request
 }
 
-// GetGroup get the group referenced by the groupid
+// GetGroup returns the group referenced by the groupid
 func (client *Client) GetGroup(groupid string) (Group, error) {
 	var group Group
 
-	resp, err := client.request().SetResult(groupResponse{}).Get(fmt.Sprintf("/group/%s", groupid))
+	resp, err := client.request().
+		SetResult(groupResponse{}).
+		Get(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
-		log.Fatal(err)
 		return group, err
 	}
 	if resp.IsError() {
-		var er errorResponse
-		err := json.Unmarshal(resp.Body(), &er)
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		return group, decodeErrorResponse(er)
-		//log.Fatal(resp.StatusCode)
-		//return group, err
+		return group, decodeErrorResponseBody(resp.Body())
 	}
-	group = resp.Result().(*groupResponse).Data
 
+	group = resp.Result().(*groupResponse).Data
 	return group, nil
 }
 
-// CreateGroup get the group referenced by the groupid
+// CreateGroup creates the group provided
 func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 	var group Group
 
-	body := &putGroup{Data: newgroup}
 	groupid := newgroup.ID
+	body := &putGroup{Data: newgroup}
 
-	resp, err := client.request().SetResult(groupResponse{}).SetBody(body).Put(fmt.Sprintf("/group/%s", groupid))
-	if resp.IsError() {
-		var er errorResponse
-		err := json.Unmarshal(resp.Body(), &er)
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		return group, decodeErrorResponse(er)
-		//log.Fatal(resp.StatusCode)
-		//return group, err
-	}
-	// groupr := resp.Result().(*GroupResponse)
-	// fmt.Printf("%#v\n", groupr)
-	// if resp.IsError() {
-	// 	//var er ErrorResponse
-	// 	return group, decodeErrorResponse(resp.Result().(*GroupResponse).Errors)
-	// 	//log.Fatal(resp.StatusCode)
-	// 	//return group, err
-	// }
+	resp, err := client.request().
+		SetBody(body).
+		SetResult(groupResponse{}).
+		Put(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
-		log.Fatal(err)
 		return group, err
 	}
+	if resp.IsError() {
+		return group, decodeErrorResponseBody(resp.Body())
+	}
 
-	// don't unmarshall inside of resty
-	// if error unmarshall with ErrorResponse
-	// if success unmarshall with GroupResponse
-
-	// resty doesn't report errors
-	// decode errors function when statuscode is not 200
-
-	fmt.Printf("%#v\n", resp)
-	fmt.Printf("%#v\n", resp.Status())
-	fmt.Printf("%#v\n", err)
 	group = resp.Result().(*groupResponse).Data
-
 	return group, nil
+}
+
+// DeleteGroup creates the group provided
+func (client *Client) DeleteGroup(groupid string) error {
+	resp, err := client.request().
+		Delete(fmt.Sprintf("/group/%s", groupid))
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return decodeErrorResponseBody(resp.Body())
+	}
+
+	return nil
+}
+
+// GetMembership returns membership of the group referenced by the groupid
+func (client *Client) GetMembership(groupid string) ([]Member, error) {
+
+	resp, err := client.request().
+		SetResult(membershipResponse{}).
+		Get(fmt.Sprintf("/group/%s/member", groupid))
+	if err != nil {
+		return make([]Member, 0), err
+	}
+	if resp.IsError() {
+		return make([]Member, 0), decodeErrorResponseBody(resp.Body())
+	}
+
+	return resp.Result().(*membershipResponse).Members, nil
+}
+
+// GetEffectiveMembership returns membership of the group referenced by the groupid
+func (client *Client) GetEffectiveMembership(groupid string) ([]EffMember, error) {
+
+	resp, err := client.request().
+		SetResult(effMembershipResponse{}).
+		Get(fmt.Sprintf("/group/%s/effective_member", groupid))
+	if err != nil {
+		return make([]EffMember, 0), err
+	}
+	if resp.IsError() {
+		return make([]EffMember, 0), decodeErrorResponseBody(resp.Body())
+	}
+
+	return resp.Result().(*effMembershipResponse).Members, nil
 }
 
 func ToEntityList(item *Entity) []Entity {
@@ -170,12 +186,23 @@ func ToEntityList(item *Entity) []Entity {
 	return ea
 }
 
-func decodeErrorResponse(er errorResponse) error {
-	e := er.Errors[0] // assume there is only ever one error in the array
-	fmt.Println("detail", e.Detail)
-	err := fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
+// func decodeErrorResponse(er errorResponse) error {
+// 	e := er.Errors[0] // assume there is only ever one error in the array
+// 	fmt.Println("detail", e.Detail)
+// 	err := fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
 
-	return err
+// 	return err
+// }
+
+// decodeErrorResponseBody extracts the API error from a Response body
+func decodeErrorResponseBody(body []byte) error {
+	var er errorResponse
+	err := json.Unmarshal(body, &er)
+	if err != nil {
+		return err
+	}
+	e := er.Errors[0] // assume there is only ever one error in the array
+	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
 }
 
 // func decodeErrorResponse(er []Error) error {
