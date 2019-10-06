@@ -140,16 +140,8 @@ type Entity struct {
 }
 
 // Member describes a member of a group
+// Used for API constructs: member, effmember and putmember
 type Member struct {
-	// Type of member enum [ uwnetid, group, dns, eppn, uwwi ]
-	Type string `json:"type"`
-
-	// ID of member
-	ID string `json:"id"`
-}
-
-// EffMember describes an effective member of a group
-type EffMember struct {
 	// Type of member enum [ uwnetid, group, dns, eppn, uwwi ]
 	Type string `json:"type"`
 
@@ -157,10 +149,10 @@ type EffMember struct {
 	ID string `json:"id"`
 
 	// Type of member enum [ direct, indirect ]
-	MType string
+	MType string `json:"-"`
 
 	// Source group(s) if not direct member
-	Source string
+	Source string `json:"-"`
 }
 
 // MembershipMeta is metadata returned by membership API requests
@@ -208,7 +200,7 @@ type effMembershipResponse struct {
 	Meta MembershipMeta
 
 	// Data
-	Members []EffMember `json:"data"`
+	Members []Member `json:"data"`
 }
 
 // Error describes API errors

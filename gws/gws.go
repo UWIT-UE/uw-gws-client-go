@@ -165,26 +165,26 @@ func (client *Client) GetMembership(groupid string) ([]Member, error) {
 }
 
 // GetEffectiveMembership returns membership of the group referenced by the groupid
-func (client *Client) GetEffectiveMembership(groupid string) ([]EffMember, error) {
+func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 
 	resp, err := client.request().
 		SetResult(effMembershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/effective_member", groupid))
 	if err != nil {
-		return make([]EffMember, 0), err
+		return make([]Member, 0), err
 	}
 	if resp.IsError() {
-		return make([]EffMember, 0), decodeErrorResponseBody(resp.Body())
+		return make([]Member, 0), decodeErrorResponseBody(resp.Body())
 	}
 
 	return resp.Result().(*effMembershipResponse).Members, nil
 }
 
-func ToEntityList(item *Entity) []Entity {
-	var ea []Entity
-	ea = append(ea, *item)
-	return ea
-}
+// func ToEntityList(item *Entity) []Entity {
+// 	var ea []Entity
+// 	ea = append(ea, *item)
+// 	return ea
+// }
 
 // func decodeErrorResponse(er errorResponse) error {
 // 	e := er.Errors[0] // assume there is only ever one error in the array
