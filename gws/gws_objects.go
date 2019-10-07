@@ -203,6 +203,33 @@ type effMembershipResponse struct {
 	Members []Member `json:"data"`
 }
 
+// membershipCountResponse is what you get back when asking for group membership count
+type membershipCountResponse struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string
+
+	// Meta Group metadata
+	Meta MembershipMeta
+
+	// Data
+	Data struct {
+		Count int
+	}
+}
+
+// putMembership is used when changing membership
+type putMembership struct {
+	Members []Member `json:"members"`
+}
+
+type missingMembersResponse struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string
+
+	// notFoundMembers is array of Members not found
+	notFoundMembers []Member
+}
+
 // Error describes API errors
 // Not useful externally
 type apiError struct {

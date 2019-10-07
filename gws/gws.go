@@ -180,6 +180,22 @@ func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 	return resp.Result().(*effMembershipResponse).Members, nil
 }
 
+// GetMembershipCount returns membership count of the group referenced by the groupid
+func (client *Client) GetMembershipCount(groupid string) (int, error) {
+
+	resp, err := client.request().
+		SetResult(membershipCountResponse{}).
+		Get(fmt.Sprintf("/group/%s/member?view=count", groupid))
+	if err != nil {
+		return 0, err
+	}
+	if resp.IsError() {
+		return 0, decodeErrorResponseBody(resp.Body())
+	}
+
+	return resp.Result().(*membershipCountResponse).Data.Count, nil
+}
+
 // func ToEntityList(item *Entity) []Entity {
 // 	var ea []Entity
 // 	ea = append(ea, *item)
