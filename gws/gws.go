@@ -134,7 +134,7 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 	return group, nil
 }
 
-// DeleteGroup creates the group provided
+// DeleteGroup deletes the group provided
 func (client *Client) DeleteGroup(groupid string) error {
 	resp, err := client.request().
 		Delete(fmt.Sprintf("/group/%s", groupid))
@@ -180,12 +180,28 @@ func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 	return resp.Result().(*effMembershipResponse).Members, nil
 }
 
-// GetMembershipCount returns membership count of the group referenced by the groupid
-func (client *Client) GetMembershipCount(groupid string) (int, error) {
+// GetMemberCount returns membership count of the group referenced by the groupid
+func (client *Client) GetMemberCount(groupid string) (int, error) {
 
 	resp, err := client.request().
 		SetResult(membershipCountResponse{}).
 		Get(fmt.Sprintf("/group/%s/member?view=count", groupid))
+	if err != nil {
+		return 0, err
+	}
+	if resp.IsError() {
+		return 0, decodeErrorResponseBody(resp.Body())
+	}
+
+	return resp.Result().(*membershipCountResponse).Data.Count, nil
+}
+
+// GetEffectiveMemberCount returns membership count of the group referenced by the groupid
+func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
+
+	resp, err := client.request().
+		SetResult(membershipCountResponse{}).
+		Get(fmt.Sprintf("/group/%s/effective_member?view=count", groupid))
 	if err != nil {
 		return 0, err
 	}

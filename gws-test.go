@@ -50,13 +50,19 @@ func main() {
 	}
 	fmt.Println("eff membership", members2)
 
-	// TEST getmembershipcount
-	memberC, err := gwsClient.GetMembershipCount("u_devtools_admin")
+	// TEST getmembercount
+	memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("membership count", memberC)
 
+	// TEST geteffectivemembercount
+	memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("eff membership count", memberC2)
 	// TEST creategroup
 	// newg := &gws.Group{
 	// 	ID:          "u_unixgrp_testgroup3",

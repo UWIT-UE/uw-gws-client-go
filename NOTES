@@ -5,17 +5,17 @@ api client example
 change package to "gws" and put in path github.com/uwit-ue/uw-gws-client-go/gws
 
 
-    def __init__(self, config={}):
     def search_groups(self, **kwargs):
-    def get_group_by_id(self, group_id):
-    def create_group(self, group):
+   x def get_group_by_id(self, group_id):
+   - def create_group(self, group):
     def update_group(self, group):
-    def delete_group(self, group_id):
-    def get_members(self, group_id):
+   x def delete_group(self, group_id):
+   x def get_members(self, group_id):
     def update_members(self, group_id, members):
-    def get_effective_members(self, group_id):
-    def get_effective_member_count(self, group_id):
+   x def get_effective_members(self, group_id):
+   x def get_effective_member_count(self, group_id):
     def is_effective_member(self, group_id, netid):
+
     def _group_entity_from_json(self, data):
     def _group_member_from_json(self, data):
     def _group_from_json(self, data):
