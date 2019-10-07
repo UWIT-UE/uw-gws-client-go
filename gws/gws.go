@@ -251,3 +251,14 @@ func decodeErrorResponseBody(body []byte) error {
 // 	}
 // 	return ea
 // }
+
+// SEARCH
+
+// s := NewSearch()
+// s = s.WithStem("u_mciman")
+// s = s.WithMember("erich")
+// s = s.WithEffectiveMember()
+// result = DoSearch(s)
+// name, stem, stemscope, member, membertype, owner, affiliate, instructor
+
+// support source=registry on all calls (do all calls support?)
