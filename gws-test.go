@@ -78,10 +78,18 @@ func main() {
 	// fmt.Println("egid", grp2.Regid, "name", grp2.DisplayName)
 
 	// TEST deletegroup
-	err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	ss := gws.NewSearch()
+	ss = ss.WithName("u_devtools_admin")
+	//ss = ss.WithMember("erich1")
+	//ss = ss.OnlyDirectMembers()
+	ss = ss.InEffectiveMembers()
+	i, err := gwsClient.DoSearch(ss)
+	fmt.Println("returned", i, err)
 
 	fmt.Println("Terminating the application...")
 }
