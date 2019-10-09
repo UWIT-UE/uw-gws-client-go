@@ -1,3 +1,4 @@
+// Package gws provides an API client for the University of Washington Groups Service API
 package gws
 
 import (
