@@ -30,39 +30,40 @@ func main() {
 	}
 
 	// TEST getgroup
-	grp1, err := gwsClient.GetGroup("u_devtools_admin")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
+	// grp1, err := gwsClient.GetGroup("u_devtools_admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
 
 	// TEST getmembership
-	members1, err := gwsClient.GetMembership("u_devtools_admin")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("membership", members1)
+	// members1, err := gwsClient.GetMembership("u_devtools_admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("membership", members1)
 
 	// TEST geteffectivemembership
-	members2, err := gwsClient.GetEffectiveMembership("u_devtools_admin")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("eff membership", members2)
+	// members2, err := gwsClient.GetEffectiveMembership("u_devtools_admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("eff membership", members2)
 
 	// TEST getmembercount
-	memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("membership count", memberC)
+	// memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("membership count", memberC)
 
 	// TEST geteffectivemembercount
-	memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("eff membership count", memberC2)
+	// memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("eff membership count", memberC2)
+
 	// TEST creategroup
 	// newg := &gws.Group{
 	// 	ID:          "u_unixgrp_testgroup3",
@@ -83,13 +84,22 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	ss := gws.NewSearch()
-	ss = ss.WithName("u_devtools_admin")
-	//ss = ss.WithMember("erich1")
-	//ss = ss.OnlyDirectMembers()
-	ss = ss.InEffectiveMembers()
-	i, err := gwsClient.DoSearch(ss)
-	fmt.Println("returned", i, err)
+	// ss := gws.NewSearch()
+	// ss = ss.WithName("u_devtools_admin")
+	// //ss = ss.WithMember("erich1")
+	// //ss = ss.OnlyDirectMembers()
+	// ss = ss.InEffectiveMembers()
+	// i, err := gwsClient.DoSearch(ss)
+	// fmt.Println("returned", i, err)
+
+	ss2 := gws.NewSearch().WithMember("erich1").InEffectiveMembers()
+	gresult, err := gwsClient.DoSearch(ss2)
+
+	if err == nil {
+		for _, g := range gresult {
+			fmt.Println(g.ID)
+		}
+	}
 
 	fmt.Println("Terminating the application...")
 }
