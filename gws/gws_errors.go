@@ -50,6 +50,12 @@ func decodeErrorResponseBody(body []byte) error {
 	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
 }
 
+// formatErrorResponse extracts the API error into an error
+func formatErrorResponse(er *errorResponse) error {
+	e := er.Errors[0] // assume there is only ever one error in the array
+	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
+}
+
 // SAMPLES
 // Error
 // 	  {

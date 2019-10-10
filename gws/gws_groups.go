@@ -115,7 +115,7 @@ func (client *Client) GetGroup(groupid string) (Group, error) {
 		return group, err
 	}
 	if resp.IsError() {
-		return group, decodeErrorResponseBody(resp.Body())
+		return group, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	group = resp.Result().(*groupResponse).Data

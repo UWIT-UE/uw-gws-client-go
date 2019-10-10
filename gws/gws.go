@@ -65,6 +65,7 @@ func (client *Client) configure() {
 
 	restyInst.SetHostURL(config.APIUrl)
 	restyInst.SetTimeout(config.Timeout * time.Second)
+	restyInst.SetError(errorResponse{})
 
 	// setup TLS here
 	restyInst.SetRootCertificate(config.CAFile)
