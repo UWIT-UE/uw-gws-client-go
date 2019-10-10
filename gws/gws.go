@@ -93,3 +93,9 @@ func (client *Client) request() *resty.Request {
 }
 
 // TODO support source=registry on all calls (do all calls support?)
+
+func ToEntityList(item *Entity) []Entity {
+	var ea []Entity
+	ea = append(ea, *item)
+	return ea
+}

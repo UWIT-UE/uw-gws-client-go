@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/uwit-ue/uw-gws-client-go/gws"
 )
@@ -65,18 +66,30 @@ func main() {
 	// fmt.Println("eff membership count", memberC2)
 
 	// TEST creategroup
-	// newg := &gws.Group{
-	// 	ID:          "u_unixgrp_testgroup3",
-	// 	DisplayName: "A test group u_unixgrp_testgroup3",
-	// 	Description: "lalala",
-	// 	Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
-	// }
+	newg := &gws.Group{
+		ID:          "u_unixgrp_testgroup3",
+		DisplayName: "A test group u_unixgrp_testgroup3",
+		Description: "lalala",
+		Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
+	}
 
-	// grp2, err := gwsClient.CreateGroup(*newg)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("egid", grp2.Regid, "name", grp2.DisplayName)
+	grp2, err := gwsClient.CreateGroup(*newg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("grp2 %+v\n", grp2)
+	fmt.Println("regid", grp2.Regid, "name", grp2.DisplayName)
+	fmt.Println("sleep")
+	time.Sleep(30 * time.Second)
+
+	// Example for updating a group
+	origGrp, err := gwsClient.GetGroup("u_unixgrp_testgroup3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	origGrp.DisplayName = "Updated " + origGrp.DisplayName
+	updatedGrp, err := gwsClient.UpdateGroup(origGrp)
+	fmt.Println("updated display name:", updatedGrp.DisplayName)
 
 	// TEST deletegroup
 	// err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
@@ -92,14 +105,14 @@ func main() {
 	// i, err := gwsClient.DoSearch(ss)
 	// fmt.Println("returned", i, err)
 
-	ss2 := gws.NewSearch().WithMember("erich1").InEffectiveMembers()
-	gresult, err := gwsClient.DoSearch(ss2)
+	// ss2 := gws.NewSearch().WithMember("erich1").InEffectiveMembers()
+	// gresult, err := gwsClient.DoSearch(ss2)
 
-	if err == nil {
-		for _, g := range gresult {
-			fmt.Println(g.ID)
-		}
-	}
+	// if err == nil {
+	// 	for _, g := range gresult {
+	// 		fmt.Println(g.ID)
+	// 	}
+	// }
 
 	fmt.Println("Terminating the application...")
 }

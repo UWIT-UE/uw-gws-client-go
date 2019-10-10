@@ -58,6 +58,9 @@ type Group struct {
 
 	// Entities who can opt out of membership
 	Optouts []Entity `json:"optouts,omitempty"`
+
+	// etag stores the header etag value that arrived with this group
+	etag string
 }
 
 // groupResponse what you get back when asking for a Group
@@ -116,6 +119,8 @@ func (client *Client) GetGroup(groupid string) (Group, error) {
 	}
 
 	group = resp.Result().(*groupResponse).Data
+	group.etag = resp.Header().Get("Etag")
+
 	return group, nil
 }
 
@@ -138,6 +143,33 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 	}
 
 	group = resp.Result().(*groupResponse).Data
+	group.etag = resp.Header().Get("Etag")
+
+	return group, nil
+}
+
+// UpdateGroup updates the provided Group
+func (client *Client) UpdateGroup(modgroup Group) (Group, error) {
+	var group Group
+
+	groupid := modgroup.ID
+	body := &putGroup{Data: modgroup}
+
+	resp, err := client.request().
+		SetHeader("If-Match", modgroup.etag).
+		SetBody(body).
+		SetResult(groupResponse{}).
+		Put(fmt.Sprintf("/group/%s", groupid))
+	if err != nil {
+		return group, err
+	}
+	if resp.IsError() {
+		return group, decodeErrorResponseBody(resp.Body())
+	}
+
+	group = resp.Result().(*groupResponse).Data
+	group.etag = resp.Header().Get("Etag")
+
 	return group, nil
 }
 
