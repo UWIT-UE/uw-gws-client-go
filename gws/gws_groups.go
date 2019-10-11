@@ -63,6 +63,21 @@ type Group struct {
 	etag string
 }
 
+// editable/settable
+//  displayname  set
+//  description  set
+//  contact set
+//  authnfactor on/off
+//  classification set
+//  dependson set
+//  entity lists: add/remove/clear
+//    admins
+//    updaters
+//    creators
+//    readers
+//    optins
+//    optouts
+
 // groupResponse what you get back when asking for a Group
 type groupResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
@@ -186,3 +201,8 @@ func (client *Client) DeleteGroup(groupid string) error {
 
 	return nil
 }
+
+// unimplemented
+// move group
+// get put delete affiliate
+// get history
