@@ -103,7 +103,7 @@ func (client *Client) GetMembership(groupid string) ([]Member, error) {
 		return make([]Member, 0), err
 	}
 	if resp.IsError() {
-		return make([]Member, 0), decodeErrorResponseBody(resp.Body())
+		return make([]Member, 0), formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	return resp.Result().(*membershipResponse).Members, nil
@@ -119,7 +119,7 @@ func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 		return make([]Member, 0), err
 	}
 	if resp.IsError() {
-		return make([]Member, 0), decodeErrorResponseBody(resp.Body())
+		return make([]Member, 0), formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	return resp.Result().(*effMembershipResponse).Members, nil
@@ -135,7 +135,7 @@ func (client *Client) GetMemberCount(groupid string) (int, error) {
 		return 0, err
 	}
 	if resp.IsError() {
-		return 0, decodeErrorResponseBody(resp.Body())
+		return 0, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
@@ -151,8 +151,22 @@ func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
 		return 0, err
 	}
 	if resp.IsError() {
-		return 0, decodeErrorResponseBody(resp.Body())
+		return 0, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
 }
+
+// GetOneMember aka IsMember(groupid, id)
+
+// AddOneMember(type, id)
+// DeleteOneMember(type, id)
+// const types: gws.UWNetID_Member gws.UWWI_Member
+
+// NewMemberShip() a new empty memberlist (or array?)
+// UpdateMembership(group, memberlist)
+// memberlist.AddUWNetIDMembers(array or id)
+// memberlist.AddDNSMembers(array or id)
+// memberlist.AddGroupIDMembers(array or id)
+// memberlist.AddUWWIMembers(array or id)
+// memberlist.AddEPPNMembers(array or id)

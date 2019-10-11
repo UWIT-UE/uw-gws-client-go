@@ -1,7 +1,6 @@
 package gws
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -39,16 +38,17 @@ type errorResponse struct {
 	Errors []apiError
 }
 
+// replace with resty unmarshall
 // decodeErrorResponseBody extracts the API error from a Response body
-func decodeErrorResponseBody(body []byte) error {
-	var er errorResponse
-	err := json.Unmarshal(body, &er)
-	if err != nil {
-		return err
-	}
-	e := er.Errors[0] // assume there is only ever one error in the array
-	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
-}
+// func decodeErrorResponseBody(body []byte) error {
+// 	var er errorResponse
+// 	err := json.Unmarshal(body, &er)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	e := er.Errors[0] // assume there is only ever one error in the array
+// 	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
+// }
 
 // formatErrorResponse extracts the API error into an error
 func formatErrorResponse(er *errorResponse) error {

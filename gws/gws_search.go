@@ -77,7 +77,7 @@ func (client *Client) DoSearch(s *SearchParameters) ([]GroupReference, error) {
 		return gr, err
 	}
 	if resp.IsError() {
-		return gr, decodeErrorResponseBody(resp.Body())
+		return gr, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	return resp.Result().(*searchResponse).Data, nil

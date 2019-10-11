@@ -139,7 +139,7 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 		return group, err
 	}
 	if resp.IsError() {
-		return group, decodeErrorResponseBody(resp.Body())
+		return group, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	group = resp.Result().(*groupResponse).Data
@@ -164,7 +164,7 @@ func (client *Client) UpdateGroup(modgroup Group) (Group, error) {
 		return group, err
 	}
 	if resp.IsError() {
-		return group, decodeErrorResponseBody(resp.Body())
+		return group, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	group = resp.Result().(*groupResponse).Data
@@ -181,7 +181,7 @@ func (client *Client) DeleteGroup(groupid string) error {
 		return err
 	}
 	if resp.IsError() {
-		return decodeErrorResponseBody(resp.Body())
+		return formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
 	return nil
