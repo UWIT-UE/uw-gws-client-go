@@ -207,14 +207,24 @@ func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
 }
 
-// AddOneMember(type, id)
-// DeleteOneMember(type, id)
+// AddMember(id)     # errors render notfound members
+// AddMembers([]id)  # errors render notfound members
+// DeleteMember(id)
+// DeleteMembers([]id)
+
 // const types: gws.UWNetID_Member gws.UWWI_Member
 
-// NewMemberShip() a new empty memberlist (or array?)
-// UpdateMembership(group, memberlist)
+// Operations on returned membership
+// memberlist = memberlist.Filter(type)
+// stringarray = memberslist.ToSringArray()
+
+// Operations on full membership
+// memberlist := BlankMemberArray() a new empty array
+
 // memberlist.AddUWNetIDMembers(array or id)
 // memberlist.AddDNSMembers(array or id)
 // memberlist.AddGroupIDMembers(array or id)
 // memberlist.AddUWWIMembers(array or id)
 // memberlist.AddEPPNMembers(array or id)
+
+// SetMembership(group, memberlist)
