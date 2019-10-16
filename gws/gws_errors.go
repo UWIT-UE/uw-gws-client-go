@@ -8,8 +8,9 @@ import (
 // Error describes API errors
 // Not useful externally
 type apiError struct {
-	Status int      `json:"status"`
-	Detail []string `json:"detail"`
+	Status    int      `json:"status"`
+	SubStatus int      `json:"subStatus"`
+	Detail    []string `json:"detail"`
 	// undocumented field "notFound" []
 }
 
@@ -53,7 +54,7 @@ type errorResponse struct {
 // formatErrorResponse extracts the API error into an error
 func formatErrorResponse(er *errorResponse) error {
 	e := er.Errors[0] // assume there is only ever one error in the array
-	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
+	return fmt.Errorf("API error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
 }
 
 // SAMPLES

@@ -125,6 +125,56 @@ func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 	return resp.Result().(*effMembershipResponse).Members, nil
 }
 
+// GetMember returns one member of the group, if present
+func (client *Client) GetMember(groupid string, id string) (Member, error) {
+	resp, err := client.request().
+		SetResult(membershipResponse{}).
+		Get(fmt.Sprintf("/group/%s/member/%s", groupid, id))
+	if err != nil {
+		return Member{}, err
+	}
+	if resp.IsError() {
+		return Member{}, formatErrorResponse(resp.Error().(*errorResponse))
+	}
+
+	return resp.Result().(*membershipResponse).Members[0], nil
+}
+
+// GetEffectiveMember returns one effective member of the group, if present
+func (client *Client) GetEffectiveMember(groupid string, id string) (Member, error) {
+	resp, err := client.request().
+		SetResult(membershipResponse{}).
+		Get(fmt.Sprintf("/group/%s/effective_member/%s", groupid, id))
+	if err != nil {
+		return Member{}, err
+	}
+	if resp.IsError() {
+		return Member{}, formatErrorResponse(resp.Error().(*errorResponse))
+	}
+
+	return resp.Result().(*membershipResponse).Members[0], nil
+}
+
+// IsMember indicates true if groupid exists and id is member
+// Group not found, member not found or general error all return false
+func (client *Client) IsMember(groupid string, id string) (bool, error) {
+	member, _ := client.GetMember(groupid, id)
+	if member.ID == "" {
+		return false, nil
+	}
+	return true, nil
+}
+
+// IsEffectiveMember indicates true if groupid exists and id is effective member
+// Group not found, member not found or general error all return false
+func (client *Client) IsEffectiveMember(groupid string, id string) (bool, error) {
+	member, _ := client.GetEffectiveMember(groupid, id)
+	if member.ID == "" {
+		return false, nil
+	}
+	return true, nil
+}
+
 // GetMemberCount returns membership count of the group referenced by the groupid
 func (client *Client) GetMemberCount(groupid string) (int, error) {
 
@@ -156,8 +206,6 @@ func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
 
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
 }
-
-// GetOneMember aka IsMember(groupid, id)
 
 // AddOneMember(type, id)
 // DeleteOneMember(type, id)

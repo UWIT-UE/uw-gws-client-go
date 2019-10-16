@@ -30,11 +30,11 @@ func main() {
 	}
 
 	// TEST getgroup
-	grp1, err := gwsClient.GetGroup("u_devtools_admin3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
+	// grp1, err := gwsClient.GetGroup("u_devtools_admin3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
 
 	// TEST getmembership
 	// members1, err := gwsClient.GetMembership("u_devtools_admin")
@@ -63,6 +63,20 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 	// fmt.Println("eff membership count", memberC2)
+
+	// TEST getmember
+	member1, err := gwsClient.GetEffectiveMember("u_devtools_admin", "erich")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("id", member1.ID, "type", member1.Type)
+
+	// TEST ismember
+	ismem, err := gwsClient.IsEffectiveMember("u_devtools_admin2", "erich2")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("erich membership:", ismem)
 
 	// TEST creategroup
 	// newg := &gws.Group{
