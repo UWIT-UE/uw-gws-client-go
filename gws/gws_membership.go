@@ -146,6 +146,7 @@ func (client *Client) GetEffectiveMember(groupid string, id string) (Member, err
 		SetResult(membershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/effective_member/%s", groupid, id))
 	if err != nil {
+		//return Member{}, err
 		return Member{}, err
 	}
 	if resp.IsError() {

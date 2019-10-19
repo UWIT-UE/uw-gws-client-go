@@ -65,7 +65,7 @@ func main() {
 	// fmt.Println("eff membership count", memberC2)
 
 	// TEST getmember
-	member1, err := gwsClient.GetEffectiveMember("u_devtools_admin", "erich")
+	member1, err := gwsClient.GetEffectiveMember("u_devtools_admin", "erich5")
 	if err != nil {
 		log.Fatal(err)
 	}
