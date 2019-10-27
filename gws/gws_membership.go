@@ -20,6 +20,15 @@ type Member struct {
 	Source string `json:"-"`
 }
 
+// Valid Member types returned by membership calls. Useful for Filter() and Match().
+const (
+	MemberTypeUWNetID = "uwnetid"
+	MemberTypeGroup   = "group"
+	MemberTypeDNS     = "dns"
+	MemberTypeEPPN    = "eppn"
+	MemberTypeUWWI    = "uwwi"
+)
+
 // MembershipMeta is metadata returned by membership API requests.
 type MembershipMeta struct {
 	// resourceType enum [ groupmembers ]
@@ -244,6 +253,28 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 		return formatErrorResponse(resp.Error().(*errorResponse))
 	}
 	return nil
+}
+
+// ToCommaString converts a slice of Members into a string of comma joined member IDs.
+// Discarding other Member fields in the process.
+func ([]Member) ToCommaString() string {
+
+}
+
+// ToIDs converts a slice of Members into a slice containing only member IDs.
+//
+func ([]Member) ToIDs() string {
+
+}
+
+// Filter removes members of the specified type from the slice.
+func ([]Member) Filter(memberType string) []Member {
+
+}
+
+// Match returns a new slice of members of the specified member type.
+func ([]Member) Match(memberType string) []Member {
+
 }
 
 // const types: gws.UWNetID_Member gws.UWWI_Member
