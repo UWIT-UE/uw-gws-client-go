@@ -15,7 +15,7 @@ type searchResponse struct {
 		// Version API version
 		Version string
 
-		// RegID the regid of the Group
+		// SearchParameters indicate the search terms used
 		SearchParameters struct {
 			Name       string
 			Stem       string
@@ -79,7 +79,6 @@ func (client *Client) DoSearch(s *SearchParameters) ([]GroupReference, error) {
 	if resp.IsError() {
 		return gr, formatErrorResponse(resp.Error().(*errorResponse))
 	}
-
 	return resp.Result().(*searchResponse).Data, nil
 }
 

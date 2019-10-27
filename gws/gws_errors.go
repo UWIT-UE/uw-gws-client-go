@@ -5,17 +5,16 @@ import (
 	"strings"
 )
 
-// Error describes API errors
-// Not useful externally
+// apiError describes an error returned by the API.
 type apiError struct {
 	Status    int      `json:"status"`
-	SubStatus int      `json:"subStatus"`
+	SubStatus string   `json:"subStatus"`
 	Detail    []string `json:"detail"`
-	// undocumented field "notFound" []
+	// NotFound only returned on membership PUT
+	NotFound []string `json:"notFound"`
 }
 
-// ErrorResponse is returned by API calls that fail
-// Not useful externally
+// errorResponse is returned by API calls that fail, and member PUTs that succeed.
 type errorResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
@@ -39,18 +38,6 @@ type errorResponse struct {
 	Errors []apiError
 }
 
-// replace with resty unmarshall
-// decodeErrorResponseBody extracts the API error from a Response body
-// func decodeErrorResponseBody(body []byte) error {
-// 	var er errorResponse
-// 	err := json.Unmarshal(body, &er)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	e := er.Errors[0] // assume there is only ever one error in the array
-// 	return fmt.Errorf("gws error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
-// }
-
 // formatErrorResponse extracts the API error into an error
 func formatErrorResponse(er *errorResponse) error {
 	e := er.Errors[0] // assume there is only ever one error in the array
@@ -58,7 +45,7 @@ func formatErrorResponse(er *errorResponse) error {
 }
 
 // SAMPLES
-// Error
+// apiError
 // 	  {
 // 		"status": 401,
 // 		"detail": [
@@ -88,3 +75,26 @@ func formatErrorResponse(er *errorResponse) error {
 // 	  }
 // 	]
 //   }
+
+// "Success" Error for PUT member
+//{
+// 	"schemas": [
+// 	  "urn:mace:washington.edu:schemas:groups:1.0"
+// 	],
+// 	"meta": [
+// 	  {
+// 		"resource": "string",
+// 		"version": "v3.0",
+// 		"id": "string",
+// 		"timestamp": 1214343146201
+// 	  }
+// 	],
+// 	"errors": [
+// 	  {
+// 		"status": 200,
+// 		"notFound": [
+// 		  "joeusor"
+// 		]
+// 	  }
+// 	]
+//}

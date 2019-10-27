@@ -2,7 +2,7 @@ package gws
 
 import "fmt"
 
-// Group Groups Service group metadata
+// Group defines a group, except for membership.
 type Group struct {
 	// Unique, opaque idenfier for the group
 	Regid string `json:"regid,omitempty"`
@@ -63,22 +63,7 @@ type Group struct {
 	etag string
 }
 
-// editable/settable
-//  displayname  set
-//  description  set
-//  contact set
-//  authnfactor on/off
-//  classification set
-//  dependson set
-//  entity lists: add/remove/clear
-//    admins
-//    updaters
-//    creators
-//    readers
-//    optins
-//    optouts
-
-// groupResponse what you get back when asking for a Group
+// groupResponse what comes back when asking for a Group.
 type groupResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
@@ -111,38 +96,31 @@ type groupResponse struct {
 	Data Group
 }
 
-// putGroup is a Group packaged for PUT body
-// This has no use externally
+// putGroup is a Group packaged for PUT body.
 type putGroup struct {
+	// Data contains a single group to be put
 	Data Group `json:"data"`
 }
 
-// TODO is putGroup readable by json package?
-
-// GetGroup returns the group referenced by the groupid
-func (client *Client) GetGroup(groupid string) (Group, error) {
-	var group Group
-
+// GetGroup returns the group identified by the groupid.
+func (client *Client) GetGroup(groupid string) (*Group, error) {
 	resp, err := client.request().
 		SetResult(groupResponse{}).
 		Get(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
-		return group, err
+		return nil, err
 	}
 	if resp.IsError() {
-		return group, formatErrorResponse(resp.Error().(*errorResponse))
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
-	group = resp.Result().(*groupResponse).Data
+	group := resp.Result().(*groupResponse).Data
 	group.etag = resp.Header().Get("Etag")
-
-	return group, nil
+	return &group, nil
 }
 
-// CreateGroup creates the group provided
-func (client *Client) CreateGroup(newgroup Group) (Group, error) {
-	var group Group
-
+// CreateGroup creates a new group as specified.
+func (client *Client) CreateGroup(newgroup Group) (*Group, error) {
 	groupid := newgroup.ID
 	body := &putGroup{Data: newgroup}
 
@@ -151,22 +129,19 @@ func (client *Client) CreateGroup(newgroup Group) (Group, error) {
 		SetResult(groupResponse{}).
 		Put(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
-		return group, err
+		return nil, err
 	}
 	if resp.IsError() {
-		return group, formatErrorResponse(resp.Error().(*errorResponse))
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
-	group = resp.Result().(*groupResponse).Data
+	group := resp.Result().(*groupResponse).Data
 	group.etag = resp.Header().Get("Etag")
-
-	return group, nil
+	return &group, nil
 }
 
-// UpdateGroup updates the provided Group
-func (client *Client) UpdateGroup(modgroup Group) (Group, error) {
-	var group Group
-
+// UpdateGroup updates an existing Group to match the specified Group.
+func (client *Client) UpdateGroup(modgroup Group) (*Group, error) {
 	groupid := modgroup.ID
 	body := &putGroup{Data: modgroup}
 
@@ -176,19 +151,18 @@ func (client *Client) UpdateGroup(modgroup Group) (Group, error) {
 		SetResult(groupResponse{}).
 		Put(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
-		return group, err
+		return nil, err
 	}
 	if resp.IsError() {
-		return group, formatErrorResponse(resp.Error().(*errorResponse))
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
-	group = resp.Result().(*groupResponse).Data
+	group := resp.Result().(*groupResponse).Data
 	group.etag = resp.Header().Get("Etag")
-
-	return group, nil
+	return &group, nil
 }
 
-// DeleteGroup deletes the group provided
+// DeleteGroup deletes the Group identified by the specified group id.
 func (client *Client) DeleteGroup(groupid string) error {
 	resp, err := client.request().
 		Delete(fmt.Sprintf("/group/%s", groupid))
@@ -198,7 +172,6 @@ func (client *Client) DeleteGroup(groupid string) error {
 	if resp.IsError() {
 		return formatErrorResponse(resp.Error().(*errorResponse))
 	}
-
 	return nil
 }
 
@@ -206,3 +179,19 @@ func (client *Client) DeleteGroup(groupid string) error {
 // move group
 // get put delete affiliate
 // get history
+
+// helpers for creating/updating group objects
+// editable/settable
+//  displayname  set
+//  description  set
+//  contact set
+//  authnfactor on/off
+//  classification set
+//  dependson set
+//  entity lists: add/remove/clear
+//    admins
+//    updaters
+//    creators
+//    readers
+//    optins
+//    optouts

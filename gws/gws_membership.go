@@ -1,9 +1,11 @@
 package gws
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-// Member describes a member of a group
-// Used for API constructs: member, effmember and putmember
+// Member fully describes a member of a group.
 type Member struct {
 	// Type of member enum [ uwnetid, group, dns, eppn, uwwi ]
 	Type string `json:"type"`
@@ -18,7 +20,7 @@ type Member struct {
 	Source string `json:"-"`
 }
 
-// MembershipMeta is metadata returned by membership API requests
+// MembershipMeta is metadata returned by membership API requests.
 type MembershipMeta struct {
 	// resourceType enum [ groupmembers ]
 	ResourceType string
@@ -42,7 +44,7 @@ type MembershipMeta struct {
 	Timestamp int
 }
 
-// membershipResponse is what you get back when asking for group membership
+// membershipResponse is what you get back when asking for group membership.
 type membershipResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
@@ -54,7 +56,7 @@ type membershipResponse struct {
 	Members []Member `json:"data"`
 }
 
-// effMmembershipResponse is what you get back when asking for effective group membership
+// effMmembershipResponse is what you get back when asking for effective group membership.
 type effMembershipResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
@@ -66,7 +68,7 @@ type effMembershipResponse struct {
 	Members []Member `json:"data"`
 }
 
-// membershipCountResponse is what you get back when asking for group membership count
+// membershipCountResponse is what you get back when asking for group membership count.
 type membershipCountResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
@@ -80,20 +82,12 @@ type membershipCountResponse struct {
 	}
 }
 
-// putMembership is used when changing membership
+// putMembership is used when changing membership.
 type putMembership struct {
-	Members []Member `json:"members"`
+	Members []Member `json:"data"`
 }
 
-type missingMembersResponse struct {
-	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
-	Schemas []string
-
-	// notFoundMembers is array of Members not found
-	notFoundMembers []Member
-}
-
-// GetMembership returns membership of the group referenced by the groupid
+// GetMembership returns membership of the group specified by the groupid.
 func (client *Client) GetMembership(groupid string) ([]Member, error) {
 
 	resp, err := client.request().
@@ -105,11 +99,10 @@ func (client *Client) GetMembership(groupid string) ([]Member, error) {
 	if resp.IsError() {
 		return make([]Member, 0), formatErrorResponse(resp.Error().(*errorResponse))
 	}
-
 	return resp.Result().(*membershipResponse).Members, nil
 }
 
-// GetEffectiveMembership returns membership of the group referenced by the groupid
+// GetEffectiveMembership returns membership of the group referenced by the groupid.
 func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 
 	resp, err := client.request().
@@ -121,43 +114,44 @@ func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
 	if resp.IsError() {
 		return make([]Member, 0), formatErrorResponse(resp.Error().(*errorResponse))
 	}
-
 	return resp.Result().(*effMembershipResponse).Members, nil
 }
 
-// GetMember returns one member of the group, if present
-func (client *Client) GetMember(groupid string, id string) (Member, error) {
+// GetMember returns one member of the group, if present.
+func (client *Client) GetMember(groupid string, id string) (*Member, error) {
 	resp, err := client.request().
 		SetResult(membershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/member/%s", groupid, id))
 	if err != nil {
-		return Member{}, err
+		return nil, err
 	}
 	if resp.IsError() {
-		return Member{}, formatErrorResponse(resp.Error().(*errorResponse))
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
-	return resp.Result().(*membershipResponse).Members[0], nil
+	m := resp.Result().(*membershipResponse).Members[0]
+	return &m, nil
 }
 
-// GetEffectiveMember returns one effective member of the group, if present
-func (client *Client) GetEffectiveMember(groupid string, id string) (Member, error) {
+// GetEffectiveMember returns one effective member of the group, if present.
+func (client *Client) GetEffectiveMember(groupid string, id string) (*Member, error) {
 	resp, err := client.request().
 		SetResult(membershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/effective_member/%s", groupid, id))
 	if err != nil {
 		//return Member{}, err
-		return Member{}, err
+		return nil, err
 	}
 	if resp.IsError() {
-		return Member{}, formatErrorResponse(resp.Error().(*errorResponse))
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
 	}
 
-	return resp.Result().(*membershipResponse).Members[0], nil
+	m := resp.Result().(*membershipResponse).Members[0]
+	return &m, nil
 }
 
-// IsMember indicates true if groupid exists and id is member
-// Group not found, member not found or general error all return false
+// IsMember indicates true if groupid exists and id is member.
+// Group not found, member not found or general error all return false.
 func (client *Client) IsMember(groupid string, id string) (bool, error) {
 	member, _ := client.GetMember(groupid, id)
 	if member.ID == "" {
@@ -166,8 +160,8 @@ func (client *Client) IsMember(groupid string, id string) (bool, error) {
 	return true, nil
 }
 
-// IsEffectiveMember indicates true if groupid exists and id is effective member
-// Group not found, member not found or general error all return false
+// IsEffectiveMember indicates true if groupid exists and id is effective member.
+// Group not found, member not found or general error all return false.
 func (client *Client) IsEffectiveMember(groupid string, id string) (bool, error) {
 	member, _ := client.GetEffectiveMember(groupid, id)
 	if member.ID == "" {
@@ -176,9 +170,9 @@ func (client *Client) IsEffectiveMember(groupid string, id string) (bool, error)
 	return true, nil
 }
 
-// GetMemberCount returns membership count of the group referenced by the groupid
+// GetMemberCount returns membership count of the group referenced by the groupid.
+// Group not found or general error returns a count of zero.
 func (client *Client) GetMemberCount(groupid string) (int, error) {
-
 	resp, err := client.request().
 		SetResult(membershipCountResponse{}).
 		Get(fmt.Sprintf("/group/%s/member?view=count", groupid))
@@ -188,13 +182,12 @@ func (client *Client) GetMemberCount(groupid string) (int, error) {
 	if resp.IsError() {
 		return 0, formatErrorResponse(resp.Error().(*errorResponse))
 	}
-
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
 }
 
-// GetEffectiveMemberCount returns membership count of the group referenced by the groupid
+// GetEffectiveMemberCount returns membership count of the group referenced by the groupid.
+// Group not found or general error returns a count of zero.
 func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
-
 	resp, err := client.request().
 		SetResult(membershipCountResponse{}).
 		Get(fmt.Sprintf("/group/%s/effective_member?view=count", groupid))
@@ -204,20 +197,61 @@ func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
 	if resp.IsError() {
 		return 0, formatErrorResponse(resp.Error().(*errorResponse))
 	}
-
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
 }
 
-// AddMember(id)     # errors render notfound members
-// AddMembers([]id)  # errors render notfound members
-// DeleteMember(id)
-// DeleteMembers([]id)
+// AddMembers adds one or more member IDs to the referenced group and returns an array of memberIDs that do not exist.
+func (client *Client) AddMembers(groupid string, memberIDs ...string) ([]string, error) {
+	resp, err := client.request().
+		SetResult(errorResponse{}).
+		Put(fmt.Sprintf("/group/%s/member/%s", groupid, strings.Join(memberIDs, ",")))
+	if err != nil {
+		return nil, err
+	}
+	if resp.IsError() {
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
+	}
+
+	// PUT member is weird, returns "error" on 200
+	er := resp.Result().(*errorResponse)
+	return er.Errors[0].NotFound, nil
+}
+
+// RemoveMembers removes one or more member IDs from the referenced group.
+func (client *Client) RemoveMembers(groupid string, memberIDs ...string) error {
+	resp, err := client.request().
+		Delete(fmt.Sprintf("/group/%s/member/%s", groupid, strings.Join(memberIDs, ",")))
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return formatErrorResponse(resp.Error().(*errorResponse))
+	}
+	return nil
+}
+
+// RemoveAllMembers removes all members from the referenced group.
+func (client *Client) RemoveAllMembers(groupid string) error {
+	body := &putMembership{Members: make([]Member, 0)}
+
+	resp, err := client.request().
+		SetBody(body).
+		Put(fmt.Sprintf("/group/%s/member", groupid))
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return formatErrorResponse(resp.Error().(*errorResponse))
+	}
+	return nil
+}
 
 // const types: gws.UWNetID_Member gws.UWWI_Member
 
 // Operations on returned membership
 // memberlist = memberlist.Filter(type)
 // stringarray = memberslist.ToSringArray()
+// commastring = memberslist.ToCommaString()  ?
 
 // Operations on full membership
 // memberlist := BlankMemberArray() a new empty array
