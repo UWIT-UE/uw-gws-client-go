@@ -2,7 +2,7 @@ package gws
 
 import "fmt"
 
-// searchResponse what you get back when searching for Groups
+// searchResponse is returned from a Group search.
 type searchResponse struct {
 	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
 	Schemas []string
@@ -38,7 +38,7 @@ type searchResponse struct {
 	Data []GroupReference
 }
 
-// GroupReference reference to a group returned by a search
+// GroupReference reference to a group returned by a search.
 type GroupReference struct {
 	// Unique, opaque idenfier for the group
 	Regid string
@@ -52,16 +52,16 @@ type GroupReference struct {
 	// URL the URL for this Group
 	URL string
 
-	// Via these represent the indirect group paths for effective searches
+	// Via contains the indirect group paths for effective searches
 	Via []string
 }
 
-// SearchParameters holds the parameters to submit to a group search.
+// SearchParameters holds the parameters to submit for a group search.
 type SearchParameters struct {
 	parameters map[string]string
 }
 
-// NewSearch creates a blank query to submit for searching
+// NewSearch creates a blank query to build up and submit for searching.
 func NewSearch() *SearchParameters {
 	return &SearchParameters{parameters: make(map[string]string)}
 }
