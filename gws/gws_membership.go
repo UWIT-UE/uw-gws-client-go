@@ -29,8 +29,8 @@ const (
 	MemberTypeUWWI    = "uwwi"
 )
 
-// MembershipMeta is metadata returned by membership API requests.
-type MembershipMeta struct {
+// membershipMeta is metadata returned by membership API requests.
+type membershipMeta struct {
 	// resourceType enum [ groupmembers ]
 	ResourceType string
 
@@ -59,7 +59,7 @@ type membershipResponse struct {
 	Schemas []string
 
 	// Meta Group metadata
-	Meta MembershipMeta
+	Meta membershipMeta
 
 	// Data
 	Members []Member `json:"data"`
@@ -71,7 +71,7 @@ type effMembershipResponse struct {
 	Schemas []string
 
 	// Meta Group metadata
-	Meta MembershipMeta
+	Meta membershipMeta
 
 	// Data
 	Members []Member `json:"data"`
@@ -83,7 +83,7 @@ type membershipCountResponse struct {
 	Schemas []string
 
 	// Meta Group metadata
-	Meta MembershipMeta
+	Meta membershipMeta
 
 	// Data
 	Data struct {
@@ -257,25 +257,25 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 
 // ToCommaString converts a slice of Members into a string of comma joined member IDs.
 // Discarding other Member fields in the process.
-func ([]Member) ToCommaString() string {
+// func ([]Member) ToCommaString() string {
 
-}
+// }
 
 // ToIDs converts a slice of Members into a slice containing only member IDs.
 //
-func ([]Member) ToIDs() string {
+// func ([]Member) ToIDs() string {
 
-}
+// }
 
 // Filter removes members of the specified type from the slice.
-func ([]Member) Filter(memberType string) []Member {
+// func ([]Member) Filter(memberType string) []Member {
 
-}
+// }
 
 // Match returns a new slice of members of the specified member type.
-func ([]Member) Match(memberType string) []Member {
+// func ([]Member) Match(memberType string) []Member {
 
-}
+// }
 
 // const types: gws.UWNetID_Member gws.UWWI_Member
 
