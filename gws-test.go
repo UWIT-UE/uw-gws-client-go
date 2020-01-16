@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strings"
-	"time"
 
 	"github.com/uwit-ue/uw-gws-client-go/gws"
 )
@@ -46,12 +44,11 @@ func main() {
 	// fmt.Println("membership", members1)
 
 	// TEST geteffectivemembership
-	// members2, err := gwsClient.GetEffectiveMembership("u_devtools_admin")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("eff membership", members2)
-	// fmt.Println("slice size, cap", len(members2), cap(members2))
+	members2, err := gwsClient.GetEffectiveMembership("u_devtools_admin")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("eff membership", members2)
 
 	// TEST getmembercount
 	// memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
@@ -61,11 +58,11 @@ func main() {
 	// fmt.Println("membership count", memberC)
 
 	// TEST geteffectivemembercount
-	// memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("eff membership count", memberC2)
+	memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("eff membership count", memberC2)
 
 	// TEST getmember
 	// member1, err := gwsClient.GetEffectiveMember("u_devtools_admin", "erich5")
@@ -131,21 +128,21 @@ func main() {
 	// 	}
 	// }
 
-	nf1, err := gwsClient.AddMembers("u_clos_test", "clos", "erich0", "erich1", "erich2")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("nf", len(nf1), strings.Join(nf1, ", "))
+	// nf1, err := gwsClient.AddMembers("u_clos_test", "clos", "erich0", "erich1", "erich2")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("nf", len(nf1), strings.Join(nf1, ", "))
 
-	time.Sleep(10 * time.Second)
+	// time.Sleep(10 * time.Second)
 
-	members1, err := gwsClient.GetMembership("u_clos_test")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("membership", members1)
+	// members1, err := gwsClient.GetMembership("u_clos_test")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("membership", members1)
 
-	time.Sleep(2 * time.Second)
+	// time.Sleep(2 * time.Second)
 
 	// err = gwsClient.RemoveMembers("u_clos_test", "erich1", "erich2", "notfoundmember333")
 	// if err != nil {
@@ -153,19 +150,19 @@ func main() {
 	// }
 	// fmt.Println("Removing")
 
-	err = gwsClient.RemoveAllMembers("u_clos_test")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Removing All")
+	// err = gwsClient.RemoveAllMembers("u_clos_test")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("Removing All")
 
-	time.Sleep(10 * time.Second)
+	// time.Sleep(10 * time.Second)
 
-	members2, err := gwsClient.GetMembership("u_clos_test")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("membership", members2)
+	// members2, err := gwsClient.GetMembership("u_clos_test")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("membership", members2)
 
 	fmt.Println("Terminating the application...")
 }

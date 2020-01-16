@@ -20,6 +20,9 @@ type Member struct {
 	Source string `json:"-"`
 }
 
+// MemberList is a slice of Members, returned by membership requests.
+type MemberList []Member
+
 // Valid Member types returned by membership calls. Useful for Filter() and Match().
 const (
 	MemberTypeUWNetID = "uwnetid"
@@ -62,7 +65,7 @@ type membershipResponse struct {
 	Meta membershipMeta
 
 	// Data
-	Members []Member `json:"data"`
+	Members MemberList `json:"data"`
 }
 
 // effMmembershipResponse is what you get back when asking for effective group membership.
@@ -74,7 +77,7 @@ type effMembershipResponse struct {
 	Meta membershipMeta
 
 	// Data
-	Members []Member `json:"data"`
+	Members MemberList `json:"data"`
 }
 
 // membershipCountResponse is what you get back when asking for group membership count.
@@ -93,37 +96,37 @@ type membershipCountResponse struct {
 
 // putMembership is used when changing membership.
 type putMembership struct {
-	Members []Member `json:"data"`
+	Members MemberList `json:"data"`
 }
 
 // GetMembership returns membership of the group specified by the groupid.
-func (client *Client) GetMembership(groupid string) ([]Member, error) {
+func (client *Client) GetMembership(groupid string) (MemberList, error) {
 
 	resp, err := client.request().
 		SetResult(membershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/member", groupid))
 	if err != nil {
-		return make([]Member, 0), err
+		return make(MemberList, 0), err
 	}
 	if resp.IsError() {
-		return make([]Member, 0), formatErrorResponse(resp.Error().(*errorResponse))
+		return make(MemberList, 0), formatErrorResponse(resp.Error().(*errorResponse))
 	}
 	return resp.Result().(*membershipResponse).Members, nil
 }
 
 // GetEffectiveMembership returns membership of the group referenced by the groupid.
-func (client *Client) GetEffectiveMembership(groupid string) ([]Member, error) {
+func (client *Client) GetEffectiveMembership(groupid string) (*MemberList, error) {
 
 	resp, err := client.request().
 		SetResult(effMembershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/effective_member", groupid))
 	if err != nil {
-		return make([]Member, 0), err
+		return &MemberList{}, err //make(MemberList, 0), err
 	}
 	if resp.IsError() {
-		return make([]Member, 0), formatErrorResponse(resp.Error().(*errorResponse))
+		return &MemberList{}, formatErrorResponse(resp.Error().(*errorResponse))
 	}
-	return resp.Result().(*effMembershipResponse).Members, nil
+	return &resp.Result().(*effMembershipResponse).Members, nil
 }
 
 // GetMember returns one member of the group, if present.
@@ -241,7 +244,7 @@ func (client *Client) RemoveMembers(groupid string, memberIDs ...string) error {
 
 // RemoveAllMembers removes all members from the referenced group.
 func (client *Client) RemoveAllMembers(groupid string) error {
-	body := &putMembership{Members: make([]Member, 0)}
+	body := &putMembership{Members: make(MemberList, 0)}
 
 	resp, err := client.request().
 		SetBody(body).
@@ -257,23 +260,24 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 
 // ToCommaString converts a slice of Members into a string of comma joined member IDs.
 // Discarding other Member fields in the process.
-// func ([]Member) ToCommaString() string {
+// func (MemberList) ToCommaString() string {
 
 // }
 
 // ToIDs converts a slice of Members into a slice containing only member IDs.
 //
-// func ([]Member) ToIDs() string {
+func (MemberList) ToIDs() string {
 
-// }
+	return "astring"
+}
 
 // Filter removes members of the specified type from the slice.
-// func ([]Member) Filter(memberType string) []Member {
+// func (MemberList) Filter(memberType string) MemberList {
 
 // }
 
 // Match returns a new slice of members of the specified member type.
-// func ([]Member) Match(memberType string) []Member {
+// func (MemberList) Match(memberType string) MemberList {
 
 // }
 

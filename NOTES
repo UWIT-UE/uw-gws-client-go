@@ -1,3 +1,7 @@
+# running
+
+go run gws-test.go -CA ca-incommon.pem -cert ref.cac.washington.edu.cert -key ref.cac.washington.edu.key 
+
 api client example
     https://github.com/hashicorp/vault/blob/4ca3b84f522046ad6c15b3cdcfc904089a66d5dd/api/client.go
 
