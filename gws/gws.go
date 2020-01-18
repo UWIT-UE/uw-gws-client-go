@@ -93,8 +93,8 @@ func (client *Client) request() *resty.Request {
 	return request
 }
 
-// TODO support source=registry on all calls (do all calls support?)
-// TODO support synchronized on PUT calls
+// TODO support source=registry on: GET membership x6, GET search x1
+// TODO support synchronized on PUT and DELETE (x5) except DELETE group, MOVE group, DELETE affiliate
 
 func ToEntityList(item *Entity) []Entity {
 	var ea []Entity
