@@ -19,7 +19,8 @@ func main() {
 	fmt.Println("Starting the application...")
 
 	clientConfig := gws.DefaultConfig()
-	clientConfig.APIUrl = "https://eval.groups.uw.edu/group_sws/v3"
+	//clientConfig.APIUrl = "https://eval.groups.uw.edu/group_sws/v3"
+	clientConfig.APIUrl = "https://groups.uw.edu/group_sws/v3"
 	clientConfig.CAFile = *caFile
 	clientConfig.ClientCert = *certFile
 	clientConfig.ClientKey = *keyFile
@@ -44,11 +45,14 @@ func main() {
 	// fmt.Println("membership", members1)
 
 	// TEST geteffectivemembership
-	members2, err := gwsClient.GetEffectiveMembership("u_devtools_admin")
+	members2, err := gwsClient.GetEffectiveMembership("u_erich_membertypes")
+	//members2, err := gwsClient.GetMembership("u_erich_membertypes")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("eff membership", members2)
+
+	fmt.Println("eff membership comma", members2.Match(gws.MemberTypeUWNetID).ToCommaString())
 
 	// TEST getmembercount
 	// memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
@@ -58,11 +62,11 @@ func main() {
 	// fmt.Println("membership count", memberC)
 
 	// TEST geteffectivemembercount
-	memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("eff membership count", memberC2)
+	// memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("eff membership count", memberC2)
 
 	// TEST getmember
 	// member1, err := gwsClient.GetEffectiveMember("u_devtools_admin", "erich5")
