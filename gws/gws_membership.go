@@ -258,35 +258,43 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 	return nil
 }
 
-// ToCommaString converts a slice of Members into a string of comma joined member IDs.
-// Discarding other Member fields in the process.
-// func (MemberList) ToCommaString() string {
-
-// }
-
-// ToIDs converts a slice of Members into a slice containing only member IDs.
-//
-func (MemberList) ToIDs() string {
-
-	return "astring"
+// ToCommaString renders a MemberList as a string of comma joined member IDs.
+// Discards other Member fields in the process.
+func (members MemberList) ToCommaString() string {
+	return strings.Join(members.ToIDs(), ",")
 }
 
-// Filter removes members of the specified type from the slice.
-// func (MemberList) Filter(memberType string) MemberList {
+// ToIDs renders a MemberList as a slice containing only member ID strings.
+// Discards other Member fields in the process.
+func (members MemberList) ToIDs() []string {
+	memberIDs := make([]string, 0, len(members))
+	for _, member := range members {
+		memberIDs = append(memberIDs, member.ID)
+	}
+	return memberIDs
+}
 
-// }
+// Filter returns a new MemberList without members of the specified type.
+func (members MemberList) Filter(memberType string) MemberList {
+	newList := make(MemberList, 0)
+	for _, member := range members {
+		if member.Type != memberType {
+			newList = append(newList, member)
+		}
+	}
+	return newList
+}
 
-// Match returns a new slice of members of the specified member type.
-// func (MemberList) Match(memberType string) MemberList {
-
-// }
-
-// const types: gws.UWNetID_Member gws.UWWI_Member
-
-// Operations on returned membership
-// memberlist = memberlist.Filter(type)
-// stringarray = memberslist.ToSringArray()
-// commastring = memberslist.ToCommaString()  ?
+// Match returns a new MemberList containing only the specified member type.
+func (members MemberList) Match(memberType string) MemberList {
+	newList := make(MemberList, 0)
+	for _, member := range members {
+		if member.Type == memberType {
+			newList = append(newList, member)
+		}
+	}
+	return newList
+}
 
 // Operations on full membership
 // memberlist := BlankMemberArray() a new empty array
