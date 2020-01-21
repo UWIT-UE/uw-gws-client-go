@@ -100,18 +100,18 @@ type putMembership struct {
 }
 
 // GetMembership returns membership of the group specified by the groupid.
-func (client *Client) GetMembership(groupid string) (MemberList, error) {
+func (client *Client) GetMembership(groupid string) (*MemberList, error) {
 
 	resp, err := client.request().
 		SetResult(membershipResponse{}).
 		Get(fmt.Sprintf("/group/%s/member", groupid))
 	if err != nil {
-		return make(MemberList, 0), err
+		return &MemberList{}, err // make(MemberList, 0), err
 	}
 	if resp.IsError() {
-		return make(MemberList, 0), formatErrorResponse(resp.Error().(*errorResponse))
+		return &MemberList{}, formatErrorResponse(resp.Error().(*errorResponse))
 	}
-	return resp.Result().(*membershipResponse).Members, nil
+	return &resp.Result().(*membershipResponse).Members, nil
 }
 
 // GetEffectiveMembership returns membership of the group referenced by the groupid.
