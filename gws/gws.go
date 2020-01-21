@@ -96,6 +96,7 @@ func (client *Client) request() *resty.Request {
 // TODO support source=registry on: GET membership x6, GET search x1
 // TODO support synchronized on PUT and DELETE (x5) except DELETE group, MOVE group, DELETE affiliate
 
+// ToEntityList makes an Entity suitable for Group admins, updaters, creators, readers, optins, optouts
 func ToEntityList(item *Entity) []Entity {
 	var ea []Entity
 	ea = append(ea, *item)
