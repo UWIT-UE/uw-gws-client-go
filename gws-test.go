@@ -168,5 +168,15 @@ func main() {
 	// }
 	// fmt.Println("membership", members2)
 
+	members5 := gws.NewMemberList()
+	members5 = members5.AddUWNetIDMembers("erich1", "erich2", "erich0")
+	fmt.Println("manipulated membership", members5)
+	// members5.AddDNSMembers("ref.s.uw.edu", "clos.s.uw.edu")
+	// fmt.Println("manipulated membership", members5)
+	// members5.AddEPPNMembers("erich@quavy.com")
+	// fmt.Println("manipulated membership", members5)
+	// members5.AddDNSMembers("erich")
+
+	gwsClient.SetMembership("u_erich_wasempty", members5)
 	fmt.Println("Terminating the application...")
 }

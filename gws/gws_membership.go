@@ -242,6 +242,26 @@ func (client *Client) RemoveMembers(groupid string, memberIDs ...string) error {
 	return nil
 }
 
+// SetMembership completely replaces group membership with specified MemberList and returns an array of memberIDs that do not exist and could not be added.
+func (client *Client) SetMembership(groupid string, newMembers *MemberList) ([]string, error) {
+	body := &putMembership{Members: *newMembers}
+
+	resp, err := client.request().
+		SetResult(errorResponse{}).
+		SetBody(body).
+		Put(fmt.Sprintf("/group/%s/member", groupid))
+	if err != nil {
+		return nil, err
+	}
+	if resp.IsError() {
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
+	}
+
+	// PUT member is weird, returns "error" on 200
+	okError := resp.Result().(*errorResponse)
+	return okError.Errors[0].NotFound, nil
+}
+
 // RemoveAllMembers removes all members from the referenced group.
 func (client *Client) RemoveAllMembers(groupid string) error {
 	body := &putMembership{Members: make(MemberList, 0)}
@@ -257,6 +277,8 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 	}
 	return nil
 }
+
+// Functions to manipluate returned MemberLists
 
 // ToCommaString renders a MemberList as a string of comma joined member IDs.
 // Discards other Member fields in the process.
@@ -275,9 +297,9 @@ func (members MemberList) ToIDs() []string {
 }
 
 // Filter returns a new MemberList without members of the specified type.
-func (members MemberList) Filter(memberType string) *MemberList {
+func (members *MemberList) Filter(memberType string) *MemberList {
 	newList := make(MemberList, 0)
-	for _, member := range members {
+	for _, member := range *members {
 		if member.Type != memberType {
 			newList = append(newList, member)
 		}
@@ -286,9 +308,9 @@ func (members MemberList) Filter(memberType string) *MemberList {
 }
 
 // Match returns a new MemberList containing only the specified member type.
-func (members MemberList) Match(memberType string) *MemberList {
+func (members *MemberList) Match(memberType string) *MemberList {
 	newList := make(MemberList, 0)
-	for _, member := range members {
+	for _, member := range *members {
 		if member.Type == memberType {
 			newList = append(newList, member)
 		}
@@ -296,46 +318,46 @@ func (members MemberList) Match(memberType string) *MemberList {
 	return &newList
 }
 
-// Operations to build and set full membership via /group/%s/member
-// memberlist := make(MemberList, 0)
-// memberlist.AddUWNetIDMembers(memberIDs ...string)
-// memberlist.AddDNSMembers(memberIDs ...string)
-// memberlist.AddGroupIDMembers(memberIDs ...string)
-// memberlist.AddUWWIMembers(memberIDs ...string)
-// memberlist.AddEPPNMembers(memberIDs ...string)
+// Functions to build and set full membership via SetMembership
 
-// AddUWNetIDMembers modifies MemberList by appending supplied memberIDs as UWNetID type Members.
+// NewMemberList creates a blank MemberList to build up and then use to set a groups membership.
+func NewMemberList() *MemberList {
+	newList := make(MemberList, 0)
+	return &newList
+}
+
+// AddUWNetIDMembers modifies MemberList by appending supplied identifiers as UWNetID type Members.
 func (members *MemberList) AddUWNetIDMembers(memberIDs ...string) *MemberList {
-	return members.appendMembers(gws.MemberTypeUWNetID, memberIDs)
+	return members.appendMembers(MemberTypeUWNetID, memberIDs)
+}
+
+// AddGroupMembers modifies MemberList by appending supplied identifiers as Group type Members.
+func (members *MemberList) AddGroupMembers(groupIDs ...string) *MemberList {
+	return members.appendMembers(MemberTypeGroup, groupIDs)
+}
+
+// AddDNSMembers modifies MemberList by appending supplied identifiers as DNS type Members.
+func (members *MemberList) AddDNSMembers(dnsIDs ...string) *MemberList {
+	return members.appendMembers(MemberTypeDNS, dnsIDs)
+}
+
+// AddUWWIMembers modifies MemberList by appending supplied identifiers as UWWI type Members.
+func (members *MemberList) AddUWWIMembers(uwwiIDs ...string) *MemberList {
+	return members.appendMembers(MemberTypeUWWI, uwwiIDs)
+}
+
+// AddEPPNMembers modifies MemberList by appending supplied identifiers as EPPN type Members.
+func (members *MemberList) AddEPPNMembers(eppnIDs ...string) *MemberList {
+	return members.appendMembers(MemberTypeEPPN, eppnIDs)
 }
 
 // appendMembers is the worker function for Add*Members
-func (members *MemberList) appendMembers(memberType string, memberIDs ...string) *MemberList {
+func (members *MemberList) appendMembers(memberType string, memberIDs []string) *MemberList {
 
 	for _, member := range memberIDs {
 		if member != "" {
-			members = append(&members, &Member{MType: memberType, ID: member})
+			*members = append(*members, Member{Type: memberType, ID: member})
 		}
 	}
 	return members
-}
-
-// SetMembership completely replaces group membership with specified MemberList and returns an array of memberIDs that do not exist and could not be added.
-func (client *Client) SetMembership(groupid string, newMembers MemberList) ([]string, error) {
-	body := &putMembership{Members: newMembers}
-
-	resp, err := client.request().
-		SetResult(errorResponse{}).
-		SetBody(body).
-		Put(fmt.Sprintf("/group/%s/member", groupid))
-	if err != nil {
-		return nil, err
-	}
-	if resp.IsError() {
-		return nil, formatErrorResponse(resp.Error().(*errorResponse))
-	}
-
-	// PUT member is weird, returns "error" on 200
-	okError := resp.Result().(*errorResponse)
-	return okError.Errors[0].NotFound, nil
 }
