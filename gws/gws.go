@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/go-resty/resty"
+	"github.com/go-resty/resty/v2"
 )
 
 // Config holds all the Client configuration
