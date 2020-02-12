@@ -45,14 +45,14 @@ func main() {
 	// fmt.Println("membership", members1)
 
 	// TEST geteffectivemembership
-	members2, err := gwsClient.GetEffectiveMembership("u_erich_membertypes")
-	//members2, err := gwsClient.GetMembership("u_erich_membertypes")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("eff membership", members2)
+	// members2, err := gwsClient.GetEffectiveMembership("u_erich_membertypes")
+	// //members2, err := gwsClient.GetMembership("u_erich_membertypes")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("eff membership", members2)
 
-	fmt.Println("eff membership comma", members2.Match(gws.MemberTypeUWNetID).ToCommaString())
+	// fmt.Println("eff membership comma", members2.Match(gws.MemberTypeUWNetID).ToCommaString())
 
 	// TEST getmembercount
 	// memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
@@ -83,36 +83,38 @@ func main() {
 	// fmt.Println("erich membership:", ismem)
 
 	// TEST creategroup
-	// newg := &gws.Group{
-	// 	ID:          "u_unixgrp_testgroup3",
-	// 	DisplayName: "A test group u_unixgrp_testgroup3",
-	// 	Description: "lalala",
-	// 	Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
-	// }
+	fmt.Println("create group")
+	newg := &gws.Group{
+		ID:          "u_unixgrp_testgroup3",
+		DisplayName: "A test group u_unixgrp_testgroup3",
+		Description: "lalala",
+		Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
+	}
 
-	// grp2, err := gwsClient.CreateGroup(*newg)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("grp2 %+v\n", grp2)
-	// fmt.Println("regid", grp2.Regid, "name", grp2.DisplayName)
+	grp2, err := gwsClient.CreateGroup(newg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("grp2 %+v\n", grp2)
+	fmt.Println("regid", grp2.Regid, "name", grp2.DisplayName)
 	// fmt.Println("sleep")
 	// time.Sleep(30 * time.Second)
 
 	// Example for updating a group
-	// origGrp, err := gwsClient.GetGroup("u_unixgrp_testgroup3")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// origGrp.DisplayName = "Updated " + origGrp.DisplayName
-	// updatedGrp, err := gwsClient.UpdateGroup(origGrp)
-	// fmt.Println("updated display name:", updatedGrp.DisplayName)
+	fmt.Println("update group")
+	origGrp, err := gwsClient.GetGroup("u_unixgrp_testgroup3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	origGrp.DisplayName = "Updated " + origGrp.DisplayName
+	updatedGrp, err := gwsClient.UpdateGroup(origGrp)
+	fmt.Println("updated display name:", updatedGrp.DisplayName)
 
 	// TEST deletegroup
-	// err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// ss := gws.NewSearch()
 	// ss = ss.WithName("u_devtools_admin")
@@ -168,15 +170,15 @@ func main() {
 	// }
 	// fmt.Println("membership", members2)
 
-	members5 := gws.NewMemberList()
-	members5 = members5.AddUWNetIDMembers("erich1", "erich2", "erich0")
-	fmt.Println("manipulated membership", members5)
-	// members5.AddDNSMembers("ref.s.uw.edu", "clos.s.uw.edu")
+	// members5 := gws.NewMemberList()
+	// members5 = members5.AddUWNetIDMembers("erich1", "erich2", "erich0")
 	// fmt.Println("manipulated membership", members5)
-	// members5.AddEPPNMembers("erich@quavy.com")
-	// fmt.Println("manipulated membership", members5)
-	// members5.AddDNSMembers("erich")
+	// // members5.AddDNSMembers("ref.s.uw.edu", "clos.s.uw.edu")
+	// // fmt.Println("manipulated membership", members5)
+	// // members5.AddEPPNMembers("erich@quavy.com")
+	// // fmt.Println("manipulated membership", members5)
+	// // members5.AddDNSMembers("erich")
 
-	gwsClient.SetMembership("u_erich_wasempty", members5)
-	fmt.Println("Terminating the application...")
+	// gwsClient.SetMembership("u_erich_wasempty", members5)
+	// fmt.Println("Terminating the application...")
 }

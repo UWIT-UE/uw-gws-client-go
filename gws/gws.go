@@ -13,6 +13,7 @@ import (
 type Config struct {
 	APIUrl        string
 	Timeout       time.Duration
+	Synchronized  bool // API writes wait for cache update
 	SkipTLSVerify bool
 	CAFile        string
 	ClientCert    string
@@ -32,6 +33,7 @@ func DefaultConfig() *Config {
 		APIUrl:        "https://groups.uw.edu/group_sws/v3", // requires CAFile to be incommon
 		Timeout:       30,
 		SkipTLSVerify: false,
+		Synchronized:  false,
 	}
 	return dc
 }
@@ -85,7 +87,7 @@ func (client *Client) SetTLSClientConfig(c *tls.Config) {
 	client.resty.SetTLSClientConfig(c)
 }
 
-// R returns new resty.Request from configured client
+// request returns new resty.Request from configured client
 func (client *Client) request() *resty.Request {
 	client.configure()
 	request := client.resty.R()
@@ -93,8 +95,26 @@ func (client *Client) request() *resty.Request {
 	return request
 }
 
-// TODO support source=registry on: GET membership x6, GET search x1
-// TODO support synchronized on PUT and DELETE (x5) except DELETE group, MOVE group, DELETE affiliate
+// EnableSynchronized enables synchronized API operation, waiting for writes to propagate to cache.
+func (client *Client) EnableSynchronized() {
+	client.config.Synchronized = true
+}
+
+// DisableSynchronized disables synchronized API operation, not waiting for writes to propagate to cache. This is the API default.
+func (client *Client) DisableSynchronized() {
+	client.config.Synchronized = false
+}
+
+// syncQueryString returns the desired sychronized mode as a query string.
+func (client *Client) syncQueryString() string {
+	if client.config.Synchronized {
+		// Value doesn't matter, only presence/absence
+		return "synchronized=true"
+	}
+	return ""
+}
+
+// TODO support synchronized on PUT affiliate
 
 // ToEntityList makes an Entity suitable for Group admins, updaters, creators, readers, optins, optouts
 func ToEntityList(item *Entity) []Entity {

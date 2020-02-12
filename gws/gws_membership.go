@@ -215,6 +215,7 @@ func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
 // AddMembers adds one or more member IDs to the referenced group and returns an array of memberIDs that do not exist and could not be added.
 func (client *Client) AddMembers(groupid string, memberIDs ...string) ([]string, error) {
 	resp, err := client.request().
+		SetQueryString(client.syncQueryString()).
 		SetResult(errorResponse{}).
 		Put(fmt.Sprintf("/group/%s/member/%s", groupid, strings.Join(memberIDs, ",")))
 	if err != nil {
@@ -232,6 +233,7 @@ func (client *Client) AddMembers(groupid string, memberIDs ...string) ([]string,
 // RemoveMembers removes one or more member IDs from the referenced group.
 func (client *Client) RemoveMembers(groupid string, memberIDs ...string) error {
 	resp, err := client.request().
+		SetQueryString(client.syncQueryString()).
 		Delete(fmt.Sprintf("/group/%s/member/%s", groupid, strings.Join(memberIDs, ",")))
 	if err != nil {
 		return err
@@ -247,8 +249,9 @@ func (client *Client) SetMembership(groupid string, newMembers *MemberList) ([]s
 	body := &putMembership{Members: *newMembers}
 
 	resp, err := client.request().
-		SetResult(errorResponse{}).
+		SetQueryString(client.syncQueryString()).
 		SetBody(body).
+		SetResult(errorResponse{}).
 		Put(fmt.Sprintf("/group/%s/member", groupid))
 	if err != nil {
 		return nil, err
@@ -267,6 +270,7 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 	body := &putMembership{Members: make(MemberList, 0)}
 
 	resp, err := client.request().
+		SetQueryString(client.syncQueryString()).
 		SetBody(body).
 		Put(fmt.Sprintf("/group/%s/member", groupid))
 	if err != nil {

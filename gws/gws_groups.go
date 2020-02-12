@@ -120,12 +120,13 @@ func (client *Client) GetGroup(groupid string) (*Group, error) {
 }
 
 // CreateGroup creates a new group as specified.
-func (client *Client) CreateGroup(newgroup Group) (*Group, error) {
+func (client *Client) CreateGroup(newgroup *Group) (*Group, error) {
 	groupid := newgroup.ID
-	body := &putGroup{Data: newgroup}
+	body := &putGroup{Data: *newgroup}
 
 	resp, err := client.request().
 		SetBody(body).
+		SetQueryString(client.syncQueryString()).
 		SetResult(groupResponse{}).
 		Put(fmt.Sprintf("/group/%s", groupid))
 	if err != nil {
@@ -141,12 +142,13 @@ func (client *Client) CreateGroup(newgroup Group) (*Group, error) {
 }
 
 // UpdateGroup updates an existing Group to match the specified Group.
-func (client *Client) UpdateGroup(modgroup Group) (*Group, error) {
+func (client *Client) UpdateGroup(modgroup *Group) (*Group, error) {
 	groupid := modgroup.ID
-	body := &putGroup{Data: modgroup}
+	body := &putGroup{Data: *modgroup}
 
 	resp, err := client.request().
 		SetHeader("If-Match", modgroup.etag).
+		SetQueryString(client.syncQueryString()).
 		SetBody(body).
 		SetResult(groupResponse{}).
 		Put(fmt.Sprintf("/group/%s", groupid))
