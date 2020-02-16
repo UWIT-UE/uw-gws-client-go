@@ -12,17 +12,17 @@ type DNSString string
 // UWWIString a Microsoft Infrastructure (MI) machine name (with a $ appended)
 type UWWIString string
 
-// Affiliate an affiliate
-// enum [ email, google, uwnetid, radius ]
-type Affiliate string
-
 // EmailSendersString Exchange Email senders - a comma separated list of ids
 // example: joeuser,u_joeuser_friends
 type EmailSendersString string
 
-// GoogleSenderString Google Groups senders - choice keyword
-// enum [ none, all, members, uw ]
-type GoogleSenderString string
+// Google Groups email senders. Returned in Entity of type "set".
+const (
+	GoogleSenderNone   = "none"
+	GoogleSenderMember = "member"
+	GoogleSenderUW     = "uw"
+	GoogleSenderAll    = "all"
+)
 
 // Entity is a named uwnetid, group, dns eppn or set
 type Entity struct {
