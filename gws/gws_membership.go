@@ -5,33 +5,6 @@ import (
 	"strings"
 )
 
-// Member fully describes a member of a group.
-type Member struct {
-	// Type of member enum [ uwnetid, group, dns, eppn, uwwi ]
-	Type string `json:"type"`
-
-	// ID of member
-	ID string `json:"id"`
-
-	// Type of member enum [ direct, indirect ]
-	MType string `json:"-"`
-
-	// Source group(s) if not direct member
-	Source string `json:"-"`
-}
-
-// MemberList is a slice of Members, returned by membership requests.
-type MemberList []Member
-
-// Valid Member types returned by membership calls. Useful for Filter() and Match().
-const (
-	MemberTypeUWNetID = "uwnetid"
-	MemberTypeGroup   = "group"
-	MemberTypeDNS     = "dns"
-	MemberTypeEPPN    = "eppn"
-	MemberTypeUWWI    = "uwwi"
-)
-
 // membershipMeta is metadata returned by membership API requests.
 type membershipMeta struct {
 	// resourceType enum [ groupmembers ]
@@ -182,9 +155,9 @@ func (client *Client) IsEffectiveMember(groupid string, id string) (bool, error)
 	return true, nil
 }
 
-// GetMemberCount returns membership count of the group referenced by the groupid.
+// MemberCount returns membership count of the group referenced by the groupid.
 // Group not found or general error returns a count of zero.
-func (client *Client) GetMemberCount(groupid string) (int, error) {
+func (client *Client) MemberCount(groupid string) (int, error) {
 	resp, err := client.request().
 		SetResult(membershipCountResponse{}).
 		Get(fmt.Sprintf("/group/%s/member?view=count", groupid))
@@ -197,9 +170,9 @@ func (client *Client) GetMemberCount(groupid string) (int, error) {
 	return resp.Result().(*membershipCountResponse).Data.Count, nil
 }
 
-// GetEffectiveMemberCount returns membership count of the group referenced by the groupid.
+// EffectiveMemberCount returns membership count of the group referenced by the groupid.
 // Group not found or general error returns a count of zero.
-func (client *Client) GetEffectiveMemberCount(groupid string) (int, error) {
+func (client *Client) EffectiveMemberCount(groupid string) (int, error) {
 	resp, err := client.request().
 		SetResult(membershipCountResponse{}).
 		Get(fmt.Sprintf("/group/%s/effective_member?view=count", groupid))
@@ -230,8 +203,8 @@ func (client *Client) AddMembers(groupid string, memberIDs ...string) ([]string,
 	return er.Errors[0].NotFound, nil
 }
 
-// RemoveMembers removes one or more member IDs from the referenced group.
-func (client *Client) RemoveMembers(groupid string, memberIDs ...string) error {
+// DeleteMembers removes one or more member IDs from the referenced group.
+func (client *Client) DeleteMembers(groupid string, memberIDs ...string) error {
 	resp, err := client.request().
 		SetQueryString(client.syncQueryString()).
 		Delete(fmt.Sprintf("/group/%s/member/%s", groupid, strings.Join(memberIDs, ",")))
@@ -265,8 +238,8 @@ func (client *Client) SetMembership(groupid string, newMembers *MemberList) ([]s
 	return okError.Errors[0].NotFound, nil
 }
 
-// RemoveAllMembers removes all members from the referenced group.
-func (client *Client) RemoveAllMembers(groupid string) error {
+// DeleteAllMembers removes all members from the referenced group.
+func (client *Client) DeleteAllMembers(groupid string) error {
 	body := &putMembership{Members: make(MemberList, 0)}
 
 	resp, err := client.request().
@@ -280,88 +253,4 @@ func (client *Client) RemoveAllMembers(groupid string) error {
 		return formatErrorResponse(resp.Error().(*errorResponse))
 	}
 	return nil
-}
-
-// Functions to manipluate returned MemberLists
-
-// ToCommaString renders a MemberList as a string of comma joined member IDs.
-// Discards other Member fields in the process.
-func (members MemberList) ToCommaString() string {
-	return strings.Join(members.ToIDs(), ",")
-}
-
-// ToIDs renders a MemberList as a slice containing only member ID strings.
-// Discards other Member fields in the process.
-func (members MemberList) ToIDs() []string {
-	memberIDs := make([]string, 0, len(members))
-	for _, member := range members {
-		memberIDs = append(memberIDs, member.ID)
-	}
-	return memberIDs
-}
-
-// Filter returns a new MemberList without members of the specified type.
-func (members *MemberList) Filter(memberType string) *MemberList {
-	newList := make(MemberList, 0)
-	for _, member := range *members {
-		if member.Type != memberType {
-			newList = append(newList, member)
-		}
-	}
-	return &newList
-}
-
-// Match returns a new MemberList containing only the specified member type.
-func (members *MemberList) Match(memberType string) *MemberList {
-	newList := make(MemberList, 0)
-	for _, member := range *members {
-		if member.Type == memberType {
-			newList = append(newList, member)
-		}
-	}
-	return &newList
-}
-
-// Functions to build and set full membership via SetMembership
-
-// NewMemberList creates a blank MemberList to build up and then use to set a groups membership.
-func NewMemberList() *MemberList {
-	newList := make(MemberList, 0)
-	return &newList
-}
-
-// AddUWNetIDMembers modifies MemberList by appending supplied identifiers as UWNetID type Members.
-func (members *MemberList) AddUWNetIDMembers(memberIDs ...string) *MemberList {
-	return members.appendMembers(MemberTypeUWNetID, memberIDs)
-}
-
-// AddGroupMembers modifies MemberList by appending supplied identifiers as Group type Members.
-func (members *MemberList) AddGroupMembers(groupIDs ...string) *MemberList {
-	return members.appendMembers(MemberTypeGroup, groupIDs)
-}
-
-// AddDNSMembers modifies MemberList by appending supplied identifiers as DNS type Members.
-func (members *MemberList) AddDNSMembers(dnsIDs ...string) *MemberList {
-	return members.appendMembers(MemberTypeDNS, dnsIDs)
-}
-
-// AddUWWIMembers modifies MemberList by appending supplied identifiers as UWWI type Members.
-func (members *MemberList) AddUWWIMembers(uwwiIDs ...string) *MemberList {
-	return members.appendMembers(MemberTypeUWWI, uwwiIDs)
-}
-
-// AddEPPNMembers modifies MemberList by appending supplied identifiers as EPPN type Members.
-func (members *MemberList) AddEPPNMembers(eppnIDs ...string) *MemberList {
-	return members.appendMembers(MemberTypeEPPN, eppnIDs)
-}
-
-// appendMembers is the worker function for Add*Members
-func (members *MemberList) appendMembers(memberType string, memberIDs []string) *MemberList {
-
-	for _, member := range memberIDs {
-		if member != "" {
-			*members = append(*members, Member{Type: memberType, ID: member})
-		}
-	}
-	return members
 }

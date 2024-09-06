@@ -77,8 +77,7 @@ func (client *Client) configure() {
 		return
 	}
 	restyInst.SetCertificates(cert)
-	restyInst.SetDebug(true)
-	//fmt.Printf("%#v\n", config)
+	restyInst.SetDebug(false)
 	client.configured = true
 }
 
@@ -116,9 +115,3 @@ func (client *Client) syncQueryString() string {
 
 // TODO support synchronized on PUT affiliate
 
-// ToEntityList makes an Entity suitable for Group admins, updaters, creators, readers, optins, optouts
-func ToEntityList(item *Entity) []Entity {
-	var ea []Entity
-	ea = append(ea, *item)
-	return ea
-}
