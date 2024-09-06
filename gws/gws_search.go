@@ -40,7 +40,7 @@ type searchResponse struct {
 
 // GroupReference reference to a group returned by a search.
 type GroupReference struct {
-	// Unique, opaque idenfier for the group
+	// Unique, opaque identifier for the group
 	Regid string
 
 	// id of the group - includes path
@@ -66,7 +66,7 @@ func NewSearch() *SearchParameters {
 	return &SearchParameters{parameters: make(map[string]string)}
 }
 
-// DoSearch submits a search for groups with supplied search parameters.
+// DoSearch submits a search for groups matching the supplied search parameters.
 func (client *Client) DoSearch(s *SearchParameters) ([]GroupReference, error) {
 	var gr []GroupReference
 

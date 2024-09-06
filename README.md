@@ -7,9 +7,6 @@ ToDo:
 - move group
 - get put delete affiliate
 - get history
-- functions for updating fields in group objects
-- api "synchronized" operation (wait for cache update)
-- api "source=registry" operation
 - docs, including examples
 
 ## Getting Started

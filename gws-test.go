@@ -31,11 +31,11 @@ func main() {
 	}
 
 	// TEST getgroup
-	// grp1, err := gwsClient.GetGroup("u_devtools_admin")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
+	grp1, err := gwsClient.GetGroup("u_devtools_admin")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("egid", grp1.Regid, "name", grp1.DisplayName)
 
 	// TEST getmembership
 	// members1, err := gwsClient.GetMembership("u_devtools_admin")
@@ -54,15 +54,15 @@ func main() {
 
 	// fmt.Println("eff membership comma", members2.Match(gws.MemberTypeUWNetID).ToCommaString())
 
-	// TEST getmembercount
-	// memberC, err := gwsClient.GetMemberCount("u_devtools_admin")
+	// TEST MemberCount
+	// memberC, err := gwsClient.MemberCount("u_devtools_admin")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
 	// fmt.Println("membership count", memberC)
 
-	// TEST geteffectivemembercount
-	// memberC2, err := gwsClient.GetEffectiveMemberCount("u_devtools_admin")
+	// TEST EffectiveMemberCount
+	// memberC2, err := gwsClient.EffectiveMemberCount("u_devtools_admin")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -83,38 +83,37 @@ func main() {
 	// fmt.Println("erich membership:", ismem)
 
 	// TEST creategroup
-	fmt.Println("create group")
-	newg := &gws.Group{
-		ID:          "u_unixgrp_testgroup3",
-		DisplayName: "A test group u_unixgrp_testgroup3",
-		Description: "lalala",
-		Admins:      gws.ToEntityList(&gws.Entity{Type: "uwnetid", ID: "erich"}),
-	}
+	// fmt.Println("create group")
+	// newg := &gws.Group{
+	// 	ID:          "u_unixgrp_testgroup3",
+	// 	DisplayName: "A test group u_unixgrp_testgroup3",
+	// 	Description: "lalala",
+	// }
 
-	grp2, err := gwsClient.CreateGroup(newg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("grp2 %+v\n", grp2)
-	fmt.Println("regid", grp2.Regid, "name", grp2.DisplayName)
-	// fmt.Println("sleep")
-	// time.Sleep(30 * time.Second)
+	// grp2, err := gwsClient.CreateGroup(newg)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("grp2 %+v\n", grp2)
+	// fmt.Println("regid", grp2.Regid, "name", grp2.DisplayName)
+	// // fmt.Println("sleep")
+	// // time.Sleep(30 * time.Second)
 
-	// Example for updating a group
-	fmt.Println("update group")
-	origGrp, err := gwsClient.GetGroup("u_unixgrp_testgroup3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	origGrp.DisplayName = "Updated " + origGrp.DisplayName
-	updatedGrp, err := gwsClient.UpdateGroup(origGrp)
-	fmt.Println("updated display name:", updatedGrp.DisplayName)
+	// // Example for updating a group
+	// fmt.Println("update group")
+	// origGrp, err := gwsClient.GetGroup("u_unixgrp_testgroup3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// origGrp.DisplayName = "Updated " + origGrp.DisplayName
+	// updatedGrp, err := gwsClient.UpdateGroup(origGrp)
+	// fmt.Println("updated display name:", updatedGrp.DisplayName)
 
-	// TEST deletegroup
-	err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// // TEST deletegroup
+	// err = gwsClient.DeleteGroup("u_unixgrp_testgroup3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// ss := gws.NewSearch()
 	// ss = ss.WithName("u_devtools_admin")
@@ -150,13 +149,13 @@ func main() {
 
 	// time.Sleep(2 * time.Second)
 
-	// err = gwsClient.RemoveMembers("u_clos_test", "erich1", "erich2", "notfoundmember333")
+	// err = gwsClient.DeleteMembers("u_clos_test", "erich1", "erich2", "notfoundmember333")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
 	// fmt.Println("Removing")
 
-	// err = gwsClient.RemoveAllMembers("u_clos_test")
+	// err = gwsClient.DeleteAllMembers("u_clos_test")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -181,4 +180,44 @@ func main() {
 
 	// gwsClient.SetMembership("u_erich_wasempty", members5)
 	// fmt.Println("Terminating the application...")
+
+	// Manipulating group admins/owners
+
+	// gwsClient, err := gws.NewClient(clientConfig)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// ss := gws.NewSearch()
+	// ss = ss.WithOwner("somename.cac.washington.edu")
+	// grps, err := gwsClient.DoSearch(ss)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// // iterate over grps and update the admin list
+	// for _, grp := range grps {
+	// 	fmt.Println("Change group:", grp.ID)
+
+	// 	fullGrp, err := gwsClient.GetGroup(grp.ID)
+	// 	if err != nil {
+	// 		fmt.Println("Error fetching group ", grp.ID, ":", err)
+	// 		continue
+	// 	}
+
+	// 	fmt.Println("   old admins:", fullGrp.Admins.ToCommaString())
+	// 	if fullGrp.IsAdmin("somename.cac.washington.edu") && !fullGrp.IsAdmin("newname.s.uw.edu") {
+	// 		fullGrp.AddAdmin("newname.s.uw.edu")
+	// 		fmt.Println("   new admins:", fullGrp.Admins.ToCommaString())
+	// 	} else {
+	// 		continue
+	// 	}
+	// 	updatedGrp, err := gwsClient.UpdateGroup(fullGrp)
+	// 	if err != nil {
+	// 		fmt.Println("Error updating group ", fullGrp.ID, ":", err)
+	// 		continue
+	// 	}
+	// 	fmt.Println("   updated admins:", updatedGrp.Admins.ToCommaString())
+	// }
+
 }

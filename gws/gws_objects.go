@@ -24,19 +24,3 @@ type EmailSendersString string
 // enum [ none, all, members, uw ]
 type GoogleSenderString string
 
-// Entity is a named uwnetid, group, dns eppn or set
-type Entity struct {
-	// Type of entity. Enum [ uwnetid, group, dns, eppn, set ]
-	Type string `json:"type,omitempty"`
-
-	// ID of entity
-	// If the type is 'set' the id is:
-	//   all: any entity
-	//   none: no entity
-	//   uw: any UW member entity
-	//   member: any member of the group
-	ID string `json:"id,omitempty"`
-
-	// Display name of entity.
-	Name string `json:"name,omitempty"`
-}
