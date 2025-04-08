@@ -3,3 +3,4 @@
 *.pem
 junk/*
 gws-test
+go.sum
