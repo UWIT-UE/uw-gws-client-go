@@ -1,0 +1,17 @@
+# Example config file for gwstool
+# Copy this to ~/.config/gwstool/config and modify as needed
+
+# GWS API URL (default: https://groups.uw.edu/group_sws/v3)
+api_url=https://groups.uw.edu/group_sws/v3
+
+# Path to CA certificate file
+ca_file=/path/to/ca.cert
+
+# Path to client certificate file
+client_cert=/path/to/client.cert
+
+# Path to client private key file
+client_key=/path/to/client.key
+
+# Request timeout in seconds (default: 30)
+timeout=30
