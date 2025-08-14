@@ -139,7 +139,7 @@ func (client *Client) GetEffectiveMember(groupid string, id string) (*Member, er
 // Group not found, member not found or general error all return false.
 func (client *Client) IsMember(groupid string, id string) (bool, error) {
 	member, _ := client.GetMember(groupid, id)
-	if member.ID == "" {
+	if member == nil || member.ID == "" {
 		return false, nil
 	}
 	return true, nil
@@ -149,7 +149,7 @@ func (client *Client) IsMember(groupid string, id string) (bool, error) {
 // Group not found, member not found or general error all return false.
 func (client *Client) IsEffectiveMember(groupid string, id string) (bool, error) {
 	member, _ := client.GetEffectiveMember(groupid, id)
-	if member.ID == "" {
+	if member == nil || member.ID == "" {
 		return false, nil
 	}
 	return true, nil
