@@ -4,3 +4,4 @@
 junk/*
 gws-test
 go.sum
+cmd/gwstool/gwstool

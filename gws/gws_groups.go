@@ -102,6 +102,66 @@ type putGroup struct {
 	Data Group `json:"data"`
 }
 
+// HistoryEntry represents a single history activity event
+type HistoryEntry struct {
+	// Event timestamp (milliseconds since epoch)
+	Timestamp int `json:"timestamp,omitempty"`
+
+	// User who performed the action
+	User string `json:"user,omitempty"`
+
+	// Act-as user, if user acting as another
+	ActAs string `json:"actAs,omitempty"`
+
+	// Activity name (from grouper event types)
+	Activity string `json:"activity,omitempty"`
+
+	// Details of the event
+	Description string `json:"description,omitempty"`
+}
+
+// History represents the response from the history endpoint
+type History struct {
+	// Schema The schema in use. Enum [ "urn:mace:washington.edu:schemas:groups:1.0" ]
+	Schemas []string `json:"schemas,omitempty"`
+
+	// Meta History metadata
+	Meta struct {
+		// resourceType enum [ history ]
+		ResourceType string `json:"resourceType,omitempty"`
+
+		// Version API version
+		Version string `json:"version,omitempty"`
+
+		// RegID the regid of the Group
+		RegID string `json:"regid,omitempty"`
+
+		// ID the ID of the group
+		ID string `json:"id,omitempty"`
+
+		// SearchParameters the search parameters used
+		SearchParameters struct {
+			// Start time (milliseconds since epoch)
+			Start int `json:"start,omitempty"`
+
+			// Maximum number of events
+			Size int `json:"size,omitempty"`
+
+			// Sort order (ascending or descending)
+			Order string `json:"order,omitempty"`
+
+			// Member ID selector
+			MemberID string `json:"memberid,omitempty"`
+		} `json:"searchParameters,omitempty"`
+
+		// Timestamp Response timestamp (milli-seconds from epoch)
+		Timestamp int `json:"timestamp,omitempty"`
+	} `json:"meta,omitempty"`
+
+	// Data history entries
+	Data []HistoryEntry `json:"data,omitempty"`
+}
+
 type DataClassification string
 
 // Data Classifications
@@ -140,6 +200,127 @@ func (client *Client) GetGroup(groupid string) (*Group, error) {
 	group := resp.Result().(*groupResponse).Data
 	group.etag = resp.Header().Get("Etag")
 	return &group, nil
+}
+
+// HistoryOrder defines the order of history entries
+type HistoryOrder string
+
+const (
+	// HistoryOrderAscending returns history entries in ascending order (oldest first)
+	HistoryOrderAscending HistoryOrder = "a"
+
+	// HistoryOrderDescending returns history entries in descending order (newest first)
+	HistoryOrderDescending HistoryOrder = "d"
+)
+
+// HistoryActivityType defines the type of activities to filter for
+type HistoryActivityType string
+
+const (
+	// HistoryActivityTypeACL filters for ACL-related activities
+	HistoryActivityTypeACL HistoryActivityType = "acl"
+
+	// HistoryActivityTypeMembership filters for membership-related activities
+	HistoryActivityTypeMembership HistoryActivityType = "membership"
+)
+
+// HistoryOptions contains the options for retrieving group history
+type HistoryOptions struct {
+	// StartTime filters entries to those after this time (milliseconds since epoch)
+	// If zero, no start time filter is applied
+	StartTime int64
+
+	// MaxResults limits the number of history entries returned
+	// If zero, no limit is applied (server default is used)
+	MaxResults int
+
+	// Order specifies the ordering of history entries (ascending or descending)
+	// If empty, server default is used
+	Order HistoryOrder
+
+	// ActivityType filters entries by activity type (acl or membership)
+	// If empty, all activity types are included
+	ActivityType HistoryActivityType
+
+	// MemberID filters entries to those related to a specific member
+	// If empty, entries for all members are included
+	MemberID string
+}
+
+// WithStartTime sets the start time filter for history entries
+func (opts *HistoryOptions) WithStartTime(startTime int64) *HistoryOptions {
+	opts.StartTime = startTime
+	return opts
+}
+
+// WithMaxResults sets the maximum number of history entries to return
+func (opts *HistoryOptions) WithMaxResults(maxResults int) *HistoryOptions {
+	opts.MaxResults = maxResults
+	return opts
+}
+
+// WithOrder sets the order for history entries (ascending or descending)
+func (opts *HistoryOptions) WithOrder(order HistoryOrder) *HistoryOptions {
+	opts.Order = order
+	return opts
+}
+
+// WithActivityType filters history entries by activity type
+func (opts *HistoryOptions) WithActivityType(activityType HistoryActivityType) *HistoryOptions {
+	opts.ActivityType = activityType
+	return opts
+}
+
+// WithMemberID filters history entries to those related to a specific member
+func (opts *HistoryOptions) WithMemberID(memberID string) *HistoryOptions {
+	opts.MemberID = memberID
+	return opts
+}
+
+// GetHistory returns the history of changes for the group identified by the groupid.
+// The options parameter can be used to filter and order the results. If options is nil,
+// default server settings are used.
+func (client *Client) GetHistory(groupid string, options *HistoryOptions) (*History, error) {
+	if groupid == "" {
+		return nil, fmt.Errorf("groupid cannot be empty")
+	}
+
+	req := client.request().
+		SetResult(History{})
+
+	// Add query parameters based on options
+	if options != nil {
+		if options.StartTime > 0 {
+			req.SetQueryParam("start", fmt.Sprintf("%d", options.StartTime))
+		}
+
+		if options.MaxResults > 0 {
+			req.SetQueryParam("size", fmt.Sprintf("%d", options.MaxResults))
+		}
+
+		if options.Order != "" {
+			req.SetQueryParam("order", string(options.Order))
+		}
+
+		if options.ActivityType != "" {
+			req.SetQueryParam("activity", string(options.ActivityType))
+		}
+
+		if options.MemberID != "" {
+			req.SetQueryParam("id", options.MemberID)
+		}
+	}
+
+	resp, err := req.Get(fmt.Sprintf("/group/%s/history", groupid))
+	if err != nil {
+		return nil, err
+	}
+	if resp.IsError() {
+		return nil, formatErrorResponse(resp.Error().(*errorResponse))
+	}
+
+	history := resp.Result().(*History)
+	return history, nil
 }
 
 // CreateGroup creates a new group as defined by the specified Group.
@@ -203,7 +384,6 @@ func (client *Client) DeleteGroup(groupid string) error {
 // TODO unimplemented
 // move group
 // get put delete affiliate
-// get history
 
 // SetAuthnFactor sets the multi-factor authn required for the group
 func (group *Group) SetAuthnFactor(factor int) (*Group, error) {

@@ -1,0 +1,19 @@
+# Example system-wide configuration file for gws-mod
+# Copy this to /etc/gws-mod.conf and modify as needed
+# This file provides defaults for all users on the system
+# Example system-wide configuration file for gwstool
+# Copy this to /etc/gwstool.conf and modify as needed
+
+# Users can override these settings with ~/.config/gwstool/config
+
+# GWS API URL (default: https://groups.uw.edu/group_sws/v3)
+api_url=https://groups.uw.edu/group_sws/v3
+
+# Path to system CA certificate file
+ca_file=/etc/ssl/certs/uw-ca.cert
+
+# Default timeout in seconds
+timeout=30
+
+# Note: client_cert and client_key should typically be set by individual users
+# in their personal config files (~/.config/gwstool/config) for security reasons
