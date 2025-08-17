@@ -65,7 +65,7 @@ func (client *Client) configure() {
 	restyInst := client.resty
 	config := client.config
 
-	restyInst.SetHostURL(config.APIUrl)
+	restyInst.SetBaseURL(config.APIUrl)
 	restyInst.SetTimeout(config.Timeout * time.Second)
 	restyInst.SetError(errorResponse{})
 
@@ -114,4 +114,3 @@ func (client *Client) syncQueryString() string {
 }
 
 // TODO support synchronized on PUT affiliate
-
