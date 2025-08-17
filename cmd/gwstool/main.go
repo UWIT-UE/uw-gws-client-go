@@ -279,6 +279,67 @@ func outputResult(data interface{}) {
 			fmt.Printf("Member managers: %s\n", formatEntityList(v.Updaters))
 			fmt.Printf("Subgroup creators: %s\n", formatEntityList(v.Creators))
 			fmt.Printf("Membership viewers: %s\n", formatEntityList(v.Readers))
+		case *gws.History:
+			if v != nil && len(v.Data) > 0 {
+				// Define fixed column widths
+				dateWidth := 24 // Width for the date column
+				userWidth := 16 // Width for the user column
+				actWidth := 15  // Width for the activity column
+				descWidth := 70 // Width for description column
+
+				// Print header
+				fmt.Printf("%-*s %-*s %-*s %s\n",
+					dateWidth, "TIMESTAMP",
+					userWidth, "USER",
+					actWidth, "ACTIVITY",
+					"DESCRIPTION")
+				fmt.Printf("%s %s %s %s\n",
+					strings.Repeat("-", dateWidth),
+					strings.Repeat("-", userWidth),
+					strings.Repeat("-", actWidth),
+					strings.Repeat("-", descWidth))
+
+				// Print each history entry
+				for _, entry := range v.Data {
+					// Convert timestamp (in milliseconds) to human-readable format
+					ts := time.UnixMilli(int64(entry.Timestamp)).Format("2006-01-02 15:04:05 MST")
+
+					// Prepare user field (user + actAs if present)
+					user := entry.User
+					if entry.ActAs != "" {
+						user = fmt.Sprintf("%s (%s)", entry.User, entry.ActAs)
+					}
+
+					// Truncate fields if too long
+					if len(user) > userWidth {
+						user = user[:userWidth-3] + "..."
+					}
+
+					activity := entry.Activity
+					if len(activity) > actWidth {
+						activity = activity[:actWidth-3] + "..."
+					}
+
+					// Clean up description - replace any | with nothing
+					description := strings.ReplaceAll(entry.Description, "|", "")
+
+					// If description contains newlines, replace them with spaces
+					description = strings.ReplaceAll(description, "\n", " ")
+
+					// Wrap description to fit in the terminal
+					if len(description) > descWidth {
+						description = description[:descWidth-3] + "..."
+					}
+
+					fmt.Printf("%-*s %-*s %-*s %s\n",
+						dateWidth, ts,
+						userWidth, user,
+						actWidth, activity,
+						description)
+				}
+			} else {
+				fmt.Println("No history entries found")
+			}
 		case *gws.MemberList:
 			if v != nil {
 				for _, member := range *v {

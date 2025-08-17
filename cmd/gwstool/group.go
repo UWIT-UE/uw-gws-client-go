@@ -261,12 +261,62 @@ var groupDeleteCmd = &cobra.Command{
 	},
 }
 
+var (
+	historyStartTime int64
+	historySize      int
+	historyOrder     string
+	historyActivity  string
+	historyMemberId  string
+)
+
+var groupHistoryCmd = &cobra.Command{
+	Use:   "history <group-id>",
+	Short: "Get group history",
+	Long:  "Retrieve history of changes for a group",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		groupID := args[0]
+
+		// Build history options
+		options := &gws.HistoryOptions{}
+
+		if historyStartTime > 0 {
+			options.WithStartTime(historyStartTime)
+		}
+
+		if historySize > 0 {
+			options.WithMaxResults(historySize)
+		}
+
+		if historyOrder != "" {
+			options.WithOrder(gws.HistoryOrder(historyOrder))
+		}
+
+		if historyActivity != "" {
+			options.WithActivityType(gws.HistoryActivityType(historyActivity))
+		}
+
+		if historyMemberId != "" {
+			options.WithMemberID(historyMemberId)
+		}
+
+		history, err := gwsClient.GetHistory(groupID, options)
+		if err != nil {
+			return err
+		}
+
+		outputResult(history)
+		return nil
+	},
+}
+
 func init() {
 	// Add subcommands to group command
 	groupCmd.AddCommand(groupGetCmd)
 	groupCmd.AddCommand(groupCreateCmd)
 	groupCmd.AddCommand(groupUpdateCmd)
 	groupCmd.AddCommand(groupDeleteCmd)
+	groupCmd.AddCommand(groupHistoryCmd)
 
 	// Flags for create command
 	groupCreateCmd.Flags().String("display-name", "", "Display name for the group")
@@ -300,4 +350,11 @@ func init() {
 
 	// Flags for delete command
 	groupDeleteCmd.Flags().Bool("confirm", false, "Confirm deletion without prompting")
+
+	// Flags for history command
+	groupHistoryCmd.Flags().Int64Var(&historyStartTime, "start", 0, "Start time (milliseconds since epoch)")
+	groupHistoryCmd.Flags().IntVar(&historySize, "size", 0, "Maximum number of events")
+	groupHistoryCmd.Flags().StringVar(&historyOrder, "order", "", "Sort order (a=ascending, d=descending)")
+	groupHistoryCmd.Flags().StringVar(&historyActivity, "activity", "", "Activity selector (acl, membership)")
+	groupHistoryCmd.Flags().StringVar(&historyMemberId, "id", "", "Member ID selector")
 }
