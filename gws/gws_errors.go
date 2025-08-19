@@ -40,7 +40,16 @@ type errorResponse struct {
 
 // formatErrorResponse extracts the API error into an error
 func formatErrorResponse(er *errorResponse) error {
-	e := er.Errors[0] // assume there is only ever one error in the array
+	if er == nil {
+		return fmt.Errorf("API error: empty response")
+	}
+	if len(er.Errors) == 0 {
+		return fmt.Errorf("API error: no error details provided")
+	}
+	e := er.Errors[0]
+	if len(e.Detail) == 0 {
+		return fmt.Errorf("API error status %d", e.Status)
+	}
 	return fmt.Errorf("API error status %d: %s", e.Status, strings.Join(e.Detail, ", "))
 }
 

@@ -26,7 +26,7 @@ type membershipMeta struct {
 	SelfRef string
 
 	// Timestamp Response timestamp (milli-seconds from epoch)
-	Timestamp int
+	Timestamp int64
 }
 
 // membershipResponse is what you get back when asking for group membership.
