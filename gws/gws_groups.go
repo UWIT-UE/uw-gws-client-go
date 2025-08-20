@@ -17,13 +17,13 @@ type Group struct {
 	Description string `json:"description,omitempty"`
 
 	// Create timestamp (milli-seconds from epoch)
-	Created int `json:"created,omitempty"`
+	Created int64 `json:"created,omitempty"`
 
 	// Modify timestamp (milli-seconds from epoch)
-	LastModified int `json:"lastModified,omitempty"`
+	LastModified int64 `json:"lastModified,omitempty"`
 
 	// Modify timestamp of group membership (milli-seconds from epoch)
-	LastMemberModified int `json:"lastMemberModified,omitempty"`
+	LastMemberModified int64 `json:"lastMemberModified,omitempty"`
 
 	// Contact person (uwnetid) for the group
 	Contact UWNetID `json:"contact,omitempty"`
@@ -89,7 +89,7 @@ type groupResponse struct {
 		MemberRef string
 
 		// Timestamp Response timestamp (milli-seconds from epoch)
-		Timestamp int
+		Timestamp int64
 	}
 
 	// Data a Group struct
@@ -105,7 +105,7 @@ type putGroup struct {
 // HistoryEntry represents a single history activity event
 type HistoryEntry struct {
 	// Event timestamp (milliseconds since epoch)
-	Timestamp int `json:"timestamp,omitempty"`
+	Timestamp int64 `json:"timestamp,omitempty"`
 
 	// User who performed the action
 	User string `json:"user,omitempty"`
@@ -142,7 +142,7 @@ type History struct {
 		// SearchParameters the search parameters used
 		SearchParameters struct {
 			// Start time (milliseconds since epoch)
-			Start int `json:"start,omitempty"`
+			Start int64 `json:"start,omitempty"`
 
 			// Maximum number of events
 			Size int `json:"size,omitempty"`
@@ -155,7 +155,7 @@ type History struct {
 		} `json:"searchParameters,omitempty"`
 
 		// Timestamp Response timestamp (milli-seconds from epoch)
-		Timestamp int `json:"timestamp,omitempty"`
+		Timestamp int64 `json:"timestamp,omitempty"`
 	} `json:"meta,omitempty"`
 
 	// Data history entries

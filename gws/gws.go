@@ -3,7 +3,8 @@ package gws
 
 import (
 	"crypto/tls"
-	"log"
+	"errors"
+	"sync"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -25,6 +26,8 @@ type Client struct {
 	resty      *resty.Client
 	config     *Config
 	configured bool
+	once       sync.Once
+	configErr  error
 }
 
 // DefaultConfig constructs a basic Config object
@@ -40,45 +43,52 @@ func DefaultConfig() *Config {
 
 // NewClient builds a new client with defaults
 func NewClient(config *Config) (*Client, error) {
+	if config == nil {
+		return nil, errors.New("config cannot be nil")
+	}
 	restyInst := resty.New()
-	nc := &Client{resty: restyInst, config: config}
-
-	// setTLSClientConfig must be before other TLS in configure()
-	nc.resty.SetTLSClientConfig(&tls.Config{Renegotiation: tls.RenegotiateFreelyAsClient})
-	nc.configure()
-
-	// Standardize redirect policy
-	//restyInst.SetRedirectPolicy(resty.FlexibleRedirectPolicy(10))
-
-	// JSON
+	c := &Client{resty: restyInst, config: config}
+	// Prepare static headers early
 	restyInst.SetHeader("Accept", "application/json")
 	restyInst.SetHeader("Content-Type", "application/json")
+	// Defer TLS & the rest to lazy configure via sync.Once
+	c.resty.SetTLSClientConfig(&tls.Config{Renegotiation: tls.RenegotiateFreelyAsClient})
+	// Trigger initial configure so early errors are caught
+	if _, err := c.healthCheckConfigure(); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
 
-	return nc, nil
+// healthCheckConfigure performs a configure without issuing a request, useful to surface early errors.
+func (client *Client) healthCheckConfigure() (bool, error) {
+	client.configure()
+	return client.configured, client.configErr
 }
 
 func (client *Client) configure() {
-	if client.configured {
-		return
-	}
-
-	restyInst := client.resty
-	config := client.config
-
-	restyInst.SetBaseURL(config.APIUrl)
-	restyInst.SetTimeout(config.Timeout * time.Second)
-	restyInst.SetError(errorResponse{})
-
-	// setup TLS here
-	restyInst.SetRootCertificate(config.CAFile)
-	cert, err := tls.LoadX509KeyPair(config.ClientCert, config.ClientKey)
-	if err != nil {
-		log.Fatalf("ERROR client certificate: %s", err)
-		return
-	}
-	restyInst.SetCertificates(cert)
-	restyInst.SetDebug(false)
-	client.configured = true
+	client.once.Do(func() {
+		restyInst := client.resty
+		cfg := client.config
+		// Basic settings
+		restyInst.SetBaseURL(cfg.APIUrl)
+		restyInst.SetTimeout(cfg.Timeout * time.Second)
+		restyInst.SetError(errorResponse{})
+		// TLS setup
+		if cfg.CAFile != "" {
+			restyInst.SetRootCertificate(cfg.CAFile)
+		}
+		if cfg.ClientCert != "" || cfg.ClientKey != "" {
+			cert, err := tls.LoadX509KeyPair(cfg.ClientCert, cfg.ClientKey)
+			if err != nil {
+				client.configErr = err
+				return
+			}
+			restyInst.SetCertificates(cert)
+		}
+		restyInst.SetDebug(false)
+		client.configured = true
+	})
 }
 
 // SetTLSClientConfig assigns client TLS config
@@ -89,10 +99,11 @@ func (client *Client) SetTLSClientConfig(c *tls.Config) {
 // request returns new resty.Request from configured client
 func (client *Client) request() *resty.Request {
 	client.configure()
-	request := client.resty.R()
-
-	return request
+	return client.resty.R()
 }
+
+// ConfigError returns any configuration error encountered during lazy initialization.
+func (client *Client) ConfigError() error { return client.configErr }
 
 // EnableSynchronized enables synchronized API operation, waiting for writes to propagate to cache.
 func (client *Client) EnableSynchronized() {
