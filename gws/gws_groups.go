@@ -381,10 +381,6 @@ func (client *Client) DeleteGroup(groupid string) error {
 	return nil
 }
 
-// TODO unimplemented
-// move group
-// get put delete affiliate
-
 // SetAuthnFactor sets the multi-factor authn required for the group
 func (group *Group) SetAuthnFactor(factor int) (*Group, error) {
 	if factor != 0 && factor != 1 && factor != 2 {
