@@ -129,7 +129,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 **Description:** More comprehensive testing against live/mock GWS API.
 
 **Current State:**
-- Basic examples in `gws-test.go`
+- Basic library functionality works as demonstrated in README examples
 - Unit tests could be expanded
 
 **Improvements Needed:**
