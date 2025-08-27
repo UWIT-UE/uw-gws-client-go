@@ -129,5 +129,3 @@ func (client *Client) syncQueryString() string {
 	}
 	return ""
 }
-
-// TODO support synchronized on PUT affiliate
