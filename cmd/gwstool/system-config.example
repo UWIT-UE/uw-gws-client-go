@@ -1,6 +1,3 @@
-# Example system-wide configuration file for gws-mod
-# Copy this to /etc/gws-mod.conf and modify as needed
-# This file provides defaults for all users on the system
 # Example system-wide configuration file for gwstool
 # Copy this to /etc/gwstool.conf and modify as needed
 

@@ -5,13 +5,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
+	"github.comvar configInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize user configuration",
+	Long:  "Initialize a user configuration file at ~/.config/gwstool/config",
+	RunE: func(cmd *cobra.Command, args []string) error {3/cobra"
 )
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configuration management",
-	Long:  "Manage gws-mod configuration including viewing and initializing config files",
+	Short: "Manage gwstool configuration",
+	Long:  "Manage gwstool configuration including viewing and initializing config files",
 }
 
 var configShowCmd = &cobra.Command{
@@ -93,8 +97,8 @@ var configInitCmd = &cobra.Command{
 		}
 
 		// Default config content
-		configContent := `# gws-mod user configuration file
-# This file takes precedence over system configuration (/etc/gws-mod.conf)
+		configContent := `# gwstool user configuration file
+# This file takes precedence over system configuration (/etc/gwstool.conf)
 # Edit these values with your actual credentials and settings
 
 # GWS API URL
