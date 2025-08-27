@@ -14,7 +14,7 @@ import (
 type Config struct {
 	APIUrl        string
 	Timeout       time.Duration
-	Synchronized  bool // API writes wait for cache update
+	Synchronized  bool // When true, API writes wait for cache propagation before returning
 	SkipTLSVerify bool
 	CAFile        string
 	ClientCert    string
@@ -105,17 +105,23 @@ func (client *Client) request() *resty.Request {
 // ConfigError returns any configuration error encountered during lazy initialization.
 func (client *Client) ConfigError() error { return client.configErr }
 
-// EnableSynchronized enables synchronized API operation, waiting for writes to propagate to cache.
+// EnableSynchronized enables synchronized API operations. When enabled, write operations
+// (create, update, delete) will not return until the changes have propagated to the
+// API's read cache. This ensures that subsequent read operations will immediately see
+// the changes, but may result in slower write operations.
 func (client *Client) EnableSynchronized() {
 	client.config.Synchronized = true
 }
 
-// DisableSynchronized disables synchronized API operation, not waiting for writes to propagate to cache. This is the API default.
+// DisableSynchronized disables synchronized API operations (default behavior).
+// Write operations will return immediately after being processed, but changes may not
+// be visible in read operations until the cache is updated. This provides better
+// performance but requires applications to handle eventual consistency.
 func (client *Client) DisableSynchronized() {
 	client.config.Synchronized = false
 }
 
-// syncQueryString returns the desired sychronized mode as a query string.
+// syncQueryString returns the desired synchronized mode as a query string.
 func (client *Client) syncQueryString() string {
 	if client.config.Synchronized {
 		// Value doesn't matter, only presence/absence
