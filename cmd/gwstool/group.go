@@ -262,11 +262,11 @@ var groupDeleteCmd = &cobra.Command{
 }
 
 var (
-	historyStartTime int64
-	historySize      int
-	historyOrder     string
-	historyActivity  string
-	historyMemberId  string
+	historyStartTime       int64
+	historySize            int
+	historyOrder           string
+	historyActivity        string
+	historyMemberId        string
 	groupHistoryLongOutput bool
 )
 
