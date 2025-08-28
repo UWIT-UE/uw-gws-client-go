@@ -163,6 +163,28 @@ if err != nil {
 fmt.Println("Group deleted successfully")
 ```
 
+### Rename or Move a Group
+
+Rename only the leaf (terminal) name while keeping the stem:
+
+```go
+// Changes u_dept_team to u_dept_newleaf
+if err := client.RenameGroup("u_dept_team", "newleaf"); err != nil {
+    log.Fatal(err)
+}
+```
+
+Move only the stem while keeping the same leaf:
+
+```go
+// Changes u_old_dept_team to u_new_dept_team
+if err := client.MoveGroup("u_old_dept_team", "u_new_dept"); err != nil {
+    log.Fatal(err)
+}
+```
+
+Note: The client resolves the group’s regid before calling the move API to ensure idempotence and to make it easy to fetch the updated group by regid.
+
 ## History Operations
 
 ### Get Group History
@@ -530,6 +552,8 @@ gwstool config init --interactive
 gwstool group get u_my_group
 gwstool group create u_new_group --display-name "New Group" --admin "admin1"
 gwstool group history u_my_group --size 10 --order d
+gwstool group rename u_dept_team --new-leaf newleaf --show
+gwstool group move u_old_dept_team --new-stem u_new_dept --show
 
 # Member operations
 gwstool member list u_my_group
