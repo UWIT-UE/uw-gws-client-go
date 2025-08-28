@@ -66,6 +66,16 @@ gwstool group update <group-id> --display-name "New Name"
 
 # Delete a group
 gwstool group delete <group-id> --confirm
+
+# Rename the leaf (terminal) name of a group
+gwstool group rename <group-id> --new-leaf newleaf
+
+# Move a group to a new stem (path prefix)
+gwstool group move <group-id> --new-stem u_new_stem
+
+# Show the updated group after rename/move (uses regid for consistency)
+gwstool group rename <group-id> --new-leaf newleaf --show
+gwstool group move <group-id> --new-stem u_new_stem --show
 ```
 
 ### Member Operations
