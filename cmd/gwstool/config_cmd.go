@@ -5,11 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.comvar configInitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize user configuration",
-	Long:  "Initialize a user configuration file at ~/.config/gwstool/config",
-	RunE: func(cmd *cobra.Command, args []string) error {3/cobra"
+	"github.com/spf13/cobra"
 )
 
 var configCmd = &cobra.Command{
