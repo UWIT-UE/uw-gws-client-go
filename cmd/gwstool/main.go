@@ -287,6 +287,13 @@ func outputResult(data interface{}) {
 				actWidth := 15  // Width for the activity column
 				descWidth := 70 // Width for description column
 
+				if groupHistoryLongOutput {
+					dateWidth = 24
+					userWidth = 30
+					actWidth = 20
+					descWidth = 0 // No truncation
+				}
+
 				// Print header
 				fmt.Printf("%-*s %-*s %-*s %s\n",
 					dateWidth, "TIMESTAMP",
@@ -310,25 +317,24 @@ func outputResult(data interface{}) {
 						user = fmt.Sprintf("%s (%s)", entry.User, entry.ActAs)
 					}
 
-					// Truncate fields if too long
-					if len(user) > userWidth {
-						user = user[:userWidth-3] + "..."
-					}
-
 					activity := entry.Activity
-					if len(activity) > actWidth {
-						activity = activity[:actWidth-3] + "..."
-					}
-
-					// Clean up description - replace any | with nothing
 					description := strings.ReplaceAll(entry.Description, "|", "")
-
-					// If description contains newlines, replace them with spaces
 					description = strings.ReplaceAll(description, "\n", " ")
 
-					// Wrap description to fit in the terminal
-					if len(description) > descWidth {
-						description = description[:descWidth-3] + "..."
+					if !groupHistoryLongOutput {
+						// Truncate fields if too long
+						if len(user) > userWidth {
+							user = user[:userWidth-3] + "..."
+						}
+
+						if len(activity) > actWidth {
+							activity = activity[:actWidth-3] + "..."
+						}
+
+						// Wrap description to fit in the terminal
+						if len(description) > descWidth {
+							description = description[:descWidth-3] + "..."
+						}
 					}
 
 					fmt.Printf("%-*s %-*s %-*s %s\n",

@@ -267,6 +267,7 @@ var (
 	historyOrder     string
 	historyActivity  string
 	historyMemberId  string
+	groupHistoryLongOutput bool
 )
 
 var groupHistoryCmd = &cobra.Command{
@@ -352,9 +353,10 @@ func init() {
 	groupDeleteCmd.Flags().Bool("confirm", false, "Confirm deletion without prompting")
 
 	// Flags for history command
-	groupHistoryCmd.Flags().Int64Var(&historyStartTime, "start", 0, "Start time (milliseconds since epoch)")
-	groupHistoryCmd.Flags().IntVar(&historySize, "size", 0, "Maximum number of events")
-	groupHistoryCmd.Flags().StringVar(&historyOrder, "order", "", "Sort order (a=ascending, d=descending)")
-	groupHistoryCmd.Flags().StringVar(&historyActivity, "activity", "", "Activity selector (acl, membership)")
-	groupHistoryCmd.Flags().StringVar(&historyMemberId, "id", "", "Member ID selector")
+	groupHistoryCmd.Flags().Int64Var(&historyStartTime, "start-time", 0, "Start time for history (Unix timestamp)")
+	groupHistoryCmd.Flags().IntVar(&historySize, "size", 0, "Maximum number of history entries to return")
+	groupHistoryCmd.Flags().StringVar(&historyOrder, "order", "", "Order of history entries (asc or desc)")
+	groupHistoryCmd.Flags().StringVar(&historyActivity, "activity", "", "Filter by activity type")
+	groupHistoryCmd.Flags().StringVar(&historyMemberId, "member-id", "", "Filter by member ID")
+	groupHistoryCmd.Flags().BoolVar(&groupHistoryLongOutput, "long", false, "Display long output for history")
 }
