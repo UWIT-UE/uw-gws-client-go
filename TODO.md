@@ -4,19 +4,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 ## High Priority - Core API Features
 
-### 1. Group Move Operations
-**Status:** Not implemented
-**Location:** `gws/gws_groups.go:385`
-**Description:** The ability to move/rename groups to different paths in the group hierarchy.
-
-**Details:**
-- Currently missing the API endpoint implementation for group moves
-- This is a common administrative operation needed for group management
-- Would likely involve a new endpoint like `PUT /group/{old-id}/move` with new path in body
-
-**Estimated Effort:** Medium - requires new API endpoint and proper validation
-
-### 2. Affiliate Management (CRUD Operations)
+### 1. Affiliate Management (CRUD Operations)
 **Status:** Partially implemented (search only)
 **Location:** `gws/gws_groups.go:386`
 **Description:** Full CRUD operations for group affiliates are missing.
@@ -35,7 +23,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 **Estimated Effort:** Medium-High - requires multiple new endpoints and data structures
 
-### 3. Synchronized Mode for Affiliate Operations
+### 2. Synchronized Mode for Affiliate Operations
 **Status:** Not implemented
 **Location:** `gws/gws.go:133`
 **Description:** The synchronized mode (wait for cache propagation) doesn't support PUT affiliate operations.
@@ -49,7 +37,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 ## Medium Priority - Enhancements
 
-### 4. Additional Search Filters
+### 3. Additional Search Filters
 **Status:** Enhancement opportunity
 **Description:** While basic search is implemented, there may be additional search capabilities in the GWS API not yet exposed.
 
@@ -70,7 +58,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 **Estimated Effort:** Low-Medium - depends on available API capabilities
 
-### 5. Enhanced Error Handling
+### 4. Enhanced Error Handling
 **Status:** Improvement opportunity
 **Description:** While basic error handling exists, it could be enhanced with more specific error types.
 
@@ -88,7 +76,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 ## Low Priority - Nice to Have
 
-### 6. Caching and Performance Optimizations
+### 5. Caching and Performance Optimizations
 **Status:** Future enhancement
 **Description:** Client-side caching and performance improvements.
 
@@ -100,7 +88,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 **Estimated Effort:** High - requires careful design to avoid cache consistency issues
 
-### 7. Advanced CLI Features
+### 6. Advanced CLI Features
 **Status:** Enhancement opportunity
 **Description:** Additional gwstool capabilities for power users.
 
@@ -115,7 +103,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 ## Documentation and Testing
 
-### 8. API Coverage Analysis
+### 7. API Coverage Analysis
 **Status:** Ongoing need
 **Description:** Systematic review of GWS API to ensure all endpoints are covered.
 
@@ -124,7 +112,7 @@ This document tracks incomplete features, known limitations, and planned enhance
 - Identify any missing endpoints or parameters
 - Prioritize implementation based on common use cases
 
-### 9. Integration Tests
+### 8. Integration Tests
 **Status:** Could be improved
 **Description:** More comprehensive testing against live/mock GWS API.
 
@@ -142,7 +130,6 @@ This document tracks incomplete features, known limitations, and planned enhance
 
 ### Code Organization
 - New affiliate operations should go in a new file `gws/gws_affiliate.go`
-- Group move operations should be added to `gws/gws_groups.go`
 - Follow existing patterns for API client methods and error handling
 
 ### API Design Principles
@@ -169,4 +156,4 @@ When implementing features from this TODO list:
 
 ## Last Updated
 
-This TODO list was generated on August 26, 2025, based on analysis of the codebase at that time. As features are implemented or new requirements discovered, this document should be updated accordingly.
+This TODO list was updated on August 28, 2025. As features are implemented or new requirements discovered, this document should be updated accordingly.

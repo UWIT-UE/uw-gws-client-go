@@ -270,6 +270,110 @@ var (
 	groupHistoryLongOutput bool
 )
 
+var groupRenameCmd = &cobra.Command{
+	Use:   "rename <group-id>",
+	Short: "Rename the group's leaf (terminal) name",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		groupID := args[0]
+		newLeaf, _ := cmd.Flags().GetString("new-leaf")
+		show, _ := cmd.Flags().GetBool("show")
+
+		if interactive && strings.TrimSpace(newLeaf) == "" {
+			newLeaf = promptForInput("New leaf name (terminal part)")
+		}
+		newLeaf = strings.TrimSpace(newLeaf)
+		if newLeaf == "" {
+			return fmt.Errorf("--new-leaf is required (the terminal group name)")
+		}
+		if strings.Contains(newLeaf, "_") {
+			return fmt.Errorf("--new-leaf must be a terminal name and must not contain the '_' delimiter: %q", newLeaf)
+		}
+
+		// If showing the result, resolve regid before rename so we can fetch reliably after rename
+		var regid string
+		if show {
+			g, err := gwsClient.GetGroup(groupID)
+			if err != nil {
+				return err
+			}
+			regid = g.Regid
+		}
+
+		if err := gwsClient.RenameGroup(groupID, newLeaf); err != nil {
+			return err
+		}
+
+		if show {
+			if regid != "" {
+				g, err := gwsClient.GetGroup(regid)
+				if err != nil {
+					return err
+				}
+				outputResult(g)
+				return nil
+			}
+		}
+
+		if outputFormat == "json" {
+			outputResult(map[string]string{"status": "renamed", "group": groupID, "newLeaf": newLeaf})
+		} else {
+			fmt.Printf("Group '%s' renamed to leaf '%s'\n", groupID, newLeaf)
+		}
+		return nil
+	},
+}
+
+var groupMoveOnlyStemCmd = &cobra.Command{
+	Use:   "move <group-id>",
+	Short: "Move the group to a new stem (path prefix)",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		groupID := args[0]
+		newStem, _ := cmd.Flags().GetString("new-stem")
+		show, _ := cmd.Flags().GetBool("show")
+
+		if interactive && strings.TrimSpace(newStem) == "" {
+			newStem = promptForInput("New stem (path prefix)")
+		}
+		if strings.TrimSpace(newStem) == "" {
+			return fmt.Errorf("--new-stem is required (the new stem path)")
+		}
+
+		// If showing the result, resolve regid before move so we can fetch reliably after
+		var regid string
+		if show {
+			g, err := gwsClient.GetGroup(groupID)
+			if err != nil {
+				return err
+			}
+			regid = g.Regid
+		}
+
+		if err := gwsClient.MoveGroup(groupID, newStem); err != nil {
+			return err
+		}
+
+		if show {
+			if regid != "" {
+				g, err := gwsClient.GetGroup(regid)
+				if err != nil {
+					return err
+				}
+				outputResult(g)
+				return nil
+			}
+		}
+
+		if outputFormat == "json" {
+			outputResult(map[string]string{"status": "moved", "group": groupID, "newStem": newStem})
+		} else {
+			fmt.Printf("Group '%s' moved to stem '%s'\n", groupID, newStem)
+		}
+		return nil
+	},
+}
+
 var groupHistoryCmd = &cobra.Command{
 	Use:   "history <group-id>",
 	Short: "Get group history",
@@ -318,6 +422,8 @@ func init() {
 	groupCmd.AddCommand(groupUpdateCmd)
 	groupCmd.AddCommand(groupDeleteCmd)
 	groupCmd.AddCommand(groupHistoryCmd)
+	groupCmd.AddCommand(groupRenameCmd)
+	groupCmd.AddCommand(groupMoveOnlyStemCmd)
 
 	// Flags for create command
 	groupCreateCmd.Flags().String("display-name", "", "Display name for the group")
@@ -359,4 +465,12 @@ func init() {
 	groupHistoryCmd.Flags().StringVar(&historyActivity, "activity", "", "Filter by activity type")
 	groupHistoryCmd.Flags().StringVar(&historyMemberId, "member-id", "", "Filter by member ID")
 	groupHistoryCmd.Flags().BoolVar(&groupHistoryLongOutput, "long", false, "Display long output for history")
+
+	// Flags for rename command
+	groupRenameCmd.Flags().String("new-leaf", "", "New leaf (terminal) name for the group")
+	groupRenameCmd.Flags().Bool("show", false, "After renaming, fetch and show the updated group (uses regid)")
+
+	// Flags for move command
+	groupMoveOnlyStemCmd.Flags().String("new-stem", "", "New stem (path prefix) for the group")
+	groupMoveOnlyStemCmd.Flags().Bool("show", false, "After moving, fetch and show the updated group (uses regid)")
 }

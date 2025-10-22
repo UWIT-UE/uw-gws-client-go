@@ -545,3 +545,69 @@ func (group *Group) RemoveAllOptouts() (*Group, error) {
 func (group *Group) IsOptout(id string) bool {
 	return group.Optouts.Contains(id)
 }
+
+// RenameGroup changes only the terminal (leaf) name of a group while preserving its stem.
+// The groupID argument may be a group name or a regid. The method first resolves the
+// group's regid and then performs the move using /groupMove/{regid}?newext=...
+func (client *Client) RenameGroup(groupID string, newLeaf string) error {
+	if groupID == "" {
+		return fmt.Errorf("groupID cannot be empty")
+	}
+	if newLeaf == "" {
+		return fmt.Errorf("newLeaf cannot be empty")
+	}
+
+	// Resolve regid for idempotent move
+	grp, err := client.GetGroup(groupID)
+	if err != nil {
+		return err
+	}
+	regid := grp.Regid
+	if regid == "" {
+		return fmt.Errorf("could not resolve group regid")
+	}
+
+	resp, err := client.request().
+		SetQueryParam("newext", newLeaf).
+		Put(fmt.Sprintf("/groupMove/%s", regid))
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return formatErrorResponse(resp.Error().(*errorResponse))
+	}
+	return nil
+}
+
+// MoveGroup changes only the stem (path prefix) of a group while preserving its terminal (leaf) name.
+// The groupID argument may be a group name or a regid. The method first resolves the
+// group's regid and then performs the move using /groupMove/{regid}?newstem=...
+func (client *Client) MoveGroup(groupID string, newStem string) error {
+	if groupID == "" {
+		return fmt.Errorf("groupID cannot be empty")
+	}
+	if newStem == "" {
+		return fmt.Errorf("newStem cannot be empty")
+	}
+
+	// Resolve regid for idempotent move
+	grp, err := client.GetGroup(groupID)
+	if err != nil {
+		return err
+	}
+	regid := grp.Regid
+	if regid == "" {
+		return fmt.Errorf("could not resolve group regid")
+	}
+
+	resp, err := client.request().
+		SetQueryParam("newstem", newStem).
+		Put(fmt.Sprintf("/groupMove/%s", regid))
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		return formatErrorResponse(resp.Error().(*errorResponse))
+	}
+	return nil
+}
