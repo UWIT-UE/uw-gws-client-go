@@ -5,7 +5,7 @@ CLI tool for the University of Washington Groups Web Service.
 ## Installation
 
 ```bash
-go build -o gwstool ./cmd/gwstool
+cd cmd/gwstool && go build -ldflags "-X main.version=$(git describe --tags --always --dirty)" -o ../../gwstool .
 ```
 
 ## Configuration

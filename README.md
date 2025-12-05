@@ -543,7 +543,7 @@ The repository includes `gwstool`, a command-line interface for GWS operations:
 
 ```bash
 # Build the tool
-go build -o gwstool ./cmd/gwstool
+cd cmd/gwstool && go build -ldflags "-X main.version=$(git describe --tags --always --dirty)" -o ../../gwstool .
 
 # Configure credentials
 gwstool config init --interactive

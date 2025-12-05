@@ -1,7 +1,4 @@
 *.cert
 *.key
 *.pem
-junk/*
-gws-test
-go.sum
-cmd/gwstool/gwstool
+gwstool
