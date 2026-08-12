@@ -44,7 +44,12 @@ var rootCmd = &cobra.Command{
 	Short: "CLI tool for University of Washington Groups Web Service",
 	Long: `gwstool is a command-line interface for the University of Washington Groups Web Service.
 It provides access to group management, membership operations, and search functionality.`,
+	// main() prints errors; don't let cobra also print them.
+	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Args are validated by now; suppress usage output for later processing errors.
+		cmd.SilenceUsage = true
+
 		// Skip client initialization for commands that don't need it
 		if cmd.Name() == "help" || cmd.Name() == "version" ||
 			(cmd.Parent() != nil && cmd.Parent().Name() == "config") {

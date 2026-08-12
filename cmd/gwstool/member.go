@@ -165,23 +165,40 @@ var memberAddCmd = &cobra.Command{
 			}
 		}
 
-		added, err := gwsClient.AddMembers(groupID, memberIDs...)
+		notFound, err := gwsClient.AddMembers(groupID, memberIDs...)
 		if err != nil {
 			return err
 		}
 
+		if len(notFound) > 0 {
+			// notFound is a subset of the request; the rest were added successfully.
+			missing := make(map[string]bool, len(notFound))
+			for _, id := range notFound {
+				missing[id] = true
+			}
+			added := make([]string, 0, len(memberIDs))
+			for _, id := range memberIDs {
+				if !missing[id] {
+					added = append(added, id)
+				}
+			}
+
+			if len(added) > 0 {
+				return fmt.Errorf("added %d member(s) to %s: %s; %d not found and not added: %s",
+					len(added), groupID, strings.Join(added, ", "), len(notFound), strings.Join(notFound, ", "))
+			}
+			return fmt.Errorf("no members added to %s; %d not found: %s", groupID, len(notFound), strings.Join(notFound, ", "))
+		}
+
 		if outputFormat == "json" {
 			result := map[string]interface{}{
-				"group": groupID,
-				"added": added,
+				"group":     groupID,
+				"requested": memberIDs,
+				"not_found": notFound,
 			}
 			outputResult(result)
 		} else {
-			if len(added) > 0 {
-				fmt.Printf("Added %d members to %s: %s\n", len(added), groupID, strings.Join(added, ", "))
-			} else {
-				fmt.Printf("No members were added to %s\n", groupID)
-			}
+			fmt.Printf("Added %d member(s) to %s: %s\n", len(memberIDs), groupID, strings.Join(memberIDs, ", "))
 		}
 		return nil
 	},

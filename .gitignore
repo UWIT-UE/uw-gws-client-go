@@ -1,4 +1,4 @@
 *.cert
 *.key
 *.pem
-gwstool
+cmd/gwstool/gwstool
