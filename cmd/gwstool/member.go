@@ -194,7 +194,6 @@ var memberAddCmd = &cobra.Command{
 			result := map[string]interface{}{
 				"group":     groupID,
 				"requested": memberIDs,
-				"not_found": notFound,
 			}
 			outputResult(result)
 		} else {
